@@ -68,6 +68,7 @@ El nombre de la carpeta lo pone Claude Code a partir de la ruta de trabajo, así
 | `--sensibilidad` | cuánto mueve la cifra **cada** decisión arbitraria, no solo la ventana |
 | `--subagentes` | incluye las sesiones de subagentes, que son otro universo |
 | `--sin-colapsar` | cuenta cada escritura en vez de cada racha |
+| `--respuesta-en-ambito` | exige que la respuesta caiga en el MISMO ámbito que el disparador |
 | `--json` | salida para encadenar con otra cosa |
 
 **Las dos vistas que no conviene saltarse.** Una tasa global miente por omisión en dos direcciones.

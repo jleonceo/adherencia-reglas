@@ -244,6 +244,34 @@ def accion_de(nombre, entrada, rx_shell=None, carpetas=None):
     return None
 
 
+# Rutas dentro de una orden de shell. SIN expresion regular a proposito: la primera version usaba
+# una, con clases de caracteres anidadas, y se comio diez minutos de CPU en un comando largo por
+# retroceso catastrofico. Partir por espacios no retrocede nunca y hace lo mismo aqui.
+EXT_RUTA = (".md", ".py", ".json", ".ps1", ".yml", ".yaml", ".txt", ".js", ".ipynb", ".sql")
+
+
+def rutas_en_orden(cmd):
+    """Los argumentos de una orden que parecen rutas de fichero.
+
+    Deliberadamente estrecho: hace falta separador Y extension conocida. Un criterio ancho
+    recogeria opciones y URLs, y meteria ruido justo donde el ambito decide si una respuesta
+    cuenta. Se anadio el 26/07/2026, cuando la lectura estricta dio 0,0 % en todas las reglas
+    porque una orden de shell no trae `file_path` y su lista de rutas salia vacia. Un cero que
+    sale siempre no es una medida.
+    """
+    fuera = []
+    for token in cmd.replace("	", " ").split():
+        limpio = token.strip("\"'()<>,;")
+        if len(limpio) > 300:
+            continue
+        if "/" not in limpio and "\\" not in limpio:
+            continue
+        if not limpio.lower().endswith(EXT_RUTA):
+            continue
+        fuera.append(limpio.replace("\\", "/").lower())
+    return fuera
+
+
 def secuencia_de(path, colapsar=True, rx_shell=None, carpetas=None):
     """Acciones en orden. Devuelve None si el fichero no se pudo leer en absoluto.
 
@@ -298,11 +326,23 @@ def secuencia_de(path, colapsar=True, rx_shell=None, carpetas=None):
                 # aspecto de estar arreglada, que es el patron que mas veces ha aparecido hoy.
                 _fp = inp.get("file_path") or ""
                 ruta = (_fp if isinstance(_fp, str) else "").replace("\\", "/").lower()
+                # UNA ORDEN DE SHELL TAMBIEN TOCA FICHEROS, y hasta el 26/07/2026 no se miraba.
+                # `python gate.py Libro/cap3.md` no trae `file_path`, asi que su lista de rutas
+                # salia VACIA. Se noto al medir la lectura estricta: daba 0,0 % en todas las
+                # reglas, y eso no era un hallazgo, era el instrumento midiendo el objeto
+                # equivocado. Un cero que sale siempre no es una medida.
+                rutas_extra = []
+                if not ruta:
+                    cmd = inp.get("command")
+                    if isinstance(cmd, str):
+                        rutas_extra = rutas_en_orden(cmd)
+                propias = [ruta] if ruta else rutas_extra
                 if colapsar and fuera and fuera[-1][0] == a:
-                    if ruta and ruta not in fuera[-1][1]:
-                        fuera[-1][1].append(ruta)     # la racha guarda TODAS sus rutas
+                    for x in propias:
+                        if x not in fuera[-1][1]:
+                            fuera[-1][1].append(x)    # la racha guarda TODAS sus rutas
                     continue
-                fuera.append((a, [ruta] if ruta else []))
+                fuera.append((a, list(propias)))
     return fuera if lineas_ok else None
 
 
@@ -667,7 +707,8 @@ def _clave_cache(path, colapsar, rx_shell, carpetas):
     return (path, bool(colapsar), rx, cp)
 
 
-def medir(paths, reglas, colapsar=True, rx_shell=None, acciones=None, carpetas=None):
+def medir(paths, reglas, colapsar=True, rx_shell=None, acciones=None, carpetas=None,
+          estricto=False):
     """Por regla: disparadores, cumplidos, tasa y sesiones ilegibles.
 
     La tasa es None cuando no hubo disparadores. Cero de cero no es 0 % ni 100 %: es que no se pudo
@@ -746,7 +787,24 @@ def medir(paths, reglas, colapsar=True, rx_shell=None, acciones=None, carpetas=N
                     ventana_vista = acciones[max(0, i - ventana):i]
                 else:
                     ventana_vista = acciones[i + 1:i + 1 + ventana]
-                if r["respuesta"] in ventana_vista:
+                # ¿VALE CUALQUIER RESPUESTA, O SOLO LA QUE CAE EN EL MISMO AMBITO?
+                #
+                # Hasta el 26/07/2026 la ventana solo miraba NOMBRES de accion, sin ruta: escribir
+                # `Libro/cap3.md` y pasar el gate sobre OTRO fichero cualquiera contaba como
+                # cumplido. El `ambito` filtraba el disparador y NUNCA la respuesta. Lo encontro
+                # una auditoria y no estaba declarado en ningun sitio; buscado en el corpus con
+                # `consultar.py` antes de afirmarlo.
+                #
+                # NO se cambia el valor por defecto. Mover el criterio despues de ver el resultado
+                # es mover la metrica post-hoc, que es justo lo que este instrumento predica contra.
+                # Se anade como MEDIDA de sensibilidad: `--respuesta-en-ambito` da la lectura
+                # estricta y la diferencia entre las dos dice cuanto pesaba el supuesto.
+                if estricto and ambito:
+                    tramo = (seq[max(0, i - ventana):i] if r.get("direccion") == "antes"
+                             else seq[i + 1:i + 1 + ventana])
+                    if any(acc == r["respuesta"] and en_ambito(rt, ambito) for acc, rt in tramo):
+                        cumpl += 1
+                elif r["respuesta"] in ventana_vista:
                     cumpl += 1
         salida.append({"id": r["id"], "disparador": r["disparador"], "respuesta": r["respuesta"],
                        "fuente": r.get("fuente", ""), "umbral": r.get("umbral"),
@@ -819,6 +877,10 @@ def main(argv=None):
     ap.add_argument("--por-dia", type=int, default=None, metavar="N",
                     help="desglosa los ultimos N dias: una tasa global esconde si la regla se "
                          "cumplio el dia que se implanto y se olvido despues")
+    ap.add_argument("--respuesta-en-ambito", action="store_true",
+                    dest="respuesta_en_ambito",
+                    help="exige que la respuesta caiga en el MISMO ambito que el disparador. Por "
+                         "defecto vale cualquiera, que es el supuesto mas grande del instrumento")
     ap.add_argument("--sensibilidad", action="store_true",
                     help="cuanto mueve la cifra CADA decision arbitraria del instrumento: la "
                          "ventana, el colapso de rachas y la muestra minima. Si al cambiarlas se "
@@ -992,7 +1054,7 @@ def main(argv=None):
 
     try:
         res = medir(paths, reglas, colapsar=not args.sin_colapsar, rx_shell=rx_shell,
-                    acciones=acciones, carpetas=carpetas)
+                    acciones=acciones, carpetas=carpetas, estricto=args.respuesta_en_ambito)
     except ValueError as e:
         print("Regla mal declarada: %s" % e, file=sys.stderr)
         return 2
@@ -1104,6 +1166,29 @@ def main(argv=None):
             print("     %-28s %-14s %-14s" % (r0["id"][:28], fila[0], fila[1]))
         print("     Por defecto se colapsa, que es la lectura conservadora: menos denominador y")
         print("     por tanto menos exageracion del incumplimiento. `--sin-colapsar` da la otra.")
+
+        print()
+        print("  2-bis. LA RESPUESTA, ¿en el MISMO ambito que el disparador o en cualquiera?")
+        print("     %-28s %-14s %-14s" % ("regla", "cualquiera", "mismo ambito"))
+        hay_ambito = False
+        for r0 in reglas:
+            if not (r0.get("ambito") or []):
+                continue
+            hay_ambito = True
+            fila = []
+            for est in (False, True):
+                rr = medir(paths, [r0], rx_shell=rx_shell, acciones=acciones,
+                           carpetas=carpetas, estricto=est)[0]
+                fila.append("n/d" if rr["tasa"] is None
+                            else "%5.1f %% (%d)" % (rr["tasa"], rr["disparadores"]))
+            print("     %-28s %-14s %-14s" % (r0["id"][:28], fila[0], fila[1]))
+        if not hay_ambito:
+            print("     (ninguna regla declara `ambito`: esta decision no le afecta a ninguna)")
+        print("     Por defecto vale CUALQUIERA, y es el supuesto mas grande del instrumento:")
+        print("     la ventana compara nombres de accion SIN ruta, asi que escribir un documento")
+        print("     y pasar el gate sobre otro fichero cuenta como cumplido. `--respuesta-en-ambito`")
+        print("     da la lectura estricta. El defecto no se cambio al descubrirlo (26/07/2026):")
+        print("     mover el criterio despues de ver el resultado es mover la metrica post-hoc.")
 
         print()
         print("  3. MUESTRA MINIMA: por debajo de cuantas ocasiones la tasa deja de ser una tasa.")
