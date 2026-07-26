@@ -1,0 +1,17 @@
+{
+  "name": "adherencia-reglas",
+  "owner": {
+    "name": "Juan Luis León Rodríguez"
+  },
+  "plugins": [
+    {
+      "name": "adherencia-reglas",
+      "source": "./",
+      "strict": false,
+      "description": "Cuenta qué fracción de las reglas que escribiste para tu agente se cumple de verdad, sobre el historial de sesiones que Claude Code ya guarda en tu disco.",
+      "skills": [
+        "./skills/adherencia-reglas"
+      ]
+    }
+  ]
+}

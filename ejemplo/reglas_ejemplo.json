@@ -1,0 +1,40 @@
+{
+  "_que_es_esto": [
+    "Las reglas del EJEMPLO REPRODUCIBLE. Van con el historial de juguete que escribe",
+    "`fabricar_ejemplo.py`, y las dos cosas juntas hacen que la tabla del README se pueda",
+    "reproducir con dos ordenes, sin depender del historial de nadie.",
+    "",
+    "No copies estas reglas a tu proyecto. Estan escritas para que el ejemplo ensene los tres",
+    "casos que importan (cumplida, a medias, ignorada), no porque sean buenas reglas."
+  ],
+  "acciones_shell": [
+    ["gate-texto", "gate_texto\\.py"],
+    ["test", "run_tests\\.py"]
+  ],
+  "carpetas_doctrina": {
+    "skill": [],
+    "rag": []
+  },
+  "reglas": [
+    {
+      "id": "gate-tras-escribir-doc",
+      "fuente": "guia del equipo: todo documento pasa el gate de texto antes de darlo por bueno",
+      "disparador": "escribir-doc",
+      "respuesta": "gate-texto",
+      "ventana": 3,
+      "desde": "2026-07-01",
+      "umbral": null,
+      "nota": "En el historial de juguete se cumple entera en una sesion, a medias en otra y nunca en la tercera. Esa es toda la gracia del ejemplo: la tabla ensena los tres desenlaces a la vez."
+    },
+    {
+      "id": "suite-tras-tocar-codigo",
+      "fuente": "guia del equipo: si tocas codigo, pasa la suite antes de cerrar",
+      "disparador": "escribir-codigo",
+      "respuesta": "test",
+      "ventana": 3,
+      "desde": "2026-07-01",
+      "umbral": null,
+      "nota": "La sesion de juguete toca codigo cuatro veces y ejecuta la suite UNA, muy lejos. Sale cero, y ese cero ensena lo que hace la ventana: con ventana 40 saldria distinto sobre los mismos datos. Por eso `--curva-ventana` no es opcional antes de publicar un numero."
+    }
+  ]
+}

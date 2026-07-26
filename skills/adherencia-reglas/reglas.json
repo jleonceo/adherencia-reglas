@@ -1,0 +1,79 @@
+{
+  "_lee_esto_antes_de_tocar": [
+    "ESTO ES UN EJEMPLO. Son reglas inventadas de un proyecto cualquiera, para que el primer comando",
+    "devuelva algo con sentido. Borralas y escribe las tuyas: medir las reglas de otro no dice nada",
+    "de ti.",
+    "",
+    "Cada entrada es una obligacion que ya tienes escrita en algun sitio: en tu CLAUDE.md, en la guia",
+    "del equipo o en la cabeza de alguien. La tasa que sale es de HABITO, no de incumplimiento: una",
+    "regla puede no aplicar a todos sus disparadores. Sirve para decidir que hacer con cada una.",
+    "",
+    "CAMPOS. `id`, `disparador` y `respuesta` son obligatorios. Los cuatro que parecen opcionales y",
+    "no lo son:",
+    "  `desde`      fecha de alta de la regla. Sin ella se juzgan meses en los que no existia.",
+    "  `ambito`     LISTA de trozos de ruta en minusculas; basta que uno case. Sin el, la tasa mide",
+    "               una obligacion mas ancha que la escrita.",
+    "  `direccion`  'despues' (por defecto) o 'antes'. Muchas obligaciones son 'haz X ANTES de Y', y",
+    "               medirlas hacia adelante las hunde sin motivo.",
+    "  `ventana`    en cuantos pasos vale la respuesta. Mueve la cifra decenas de puntos: mira",
+    "               `--curva-ventana` antes de publicar un numero.",
+    "  `umbral`     opcional de verdad. Ponlo solo cuando sepas defenderlo; uno a ojo es peor que",
+    "               ninguno.",
+    "",
+    "ACCIONES. `acciones_shell` traduce TUS comandos a verbos. De fabrica vienen los universales",
+    "(git-commit, git-add, git-push, git-mirar, test, shell) y las suites mas comunes de varios",
+    "lenguajes, pero tu linter, tu desplegador o tu generador se llaman como se llamen en tu casa:",
+    "declaralos aqui. Declarar un nombre que YA existe lo AMPLIA, no lo sustituye: el tuyo se prueba",
+    "primero y el de fabrica sigue detras. La herramienta te lo avisa por pantalla cuando pasa.",
+    "",
+    "CARPETAS. `carpetas_doctrina` dice que rutas de TU proyecto son normas y no ficheros normales.",
+    "De ahi salen tres acciones (`escribir-doctrina`, `leer-skill`, `leer-rag`) que NO son",
+    "universales: dependen de una convencion de carpetas. Si no tienes nada parecido, dejalo con las",
+    "listas vacias y esos ficheros contaran como documento o como codigo, que es lo que son. Vacio",
+    "aqui no es un cero: es que esa distincion no existe en tu proyecto.",
+    "",
+    "Si una regla usa una accion que no existe, la herramienta PARA con un error en vez de medirla a",
+    "cero. Un cero se lee como incumplimiento y no como 'esto no aplica', y esa confusion es justo lo",
+    "que este instrumento existe para evitar."
+  ],
+  "acciones_shell": [
+    ["lint", "eslint|prettier|ruff|black|golangci-lint"],
+    ["deploy", "flyctl deploy|vercel --prod|kubectl apply|docker push"]
+  ],
+  "carpetas_doctrina": {
+    "skill": [],
+    "rag": []
+  },
+  "reglas": [
+    {
+      "id": "tests-tras-tocar-codigo",
+      "disparador": "escribir-codigo",
+      "respuesta": "test",
+      "ventana": 6,
+      "desde": "2026-01-01",
+      "fuente": "guia del equipo: no se cierra una tarea con la suite en rojo",
+      "umbral": null
+    },
+    {
+      "id": "lint-antes-de-desplegar",
+      "disparador": "deploy",
+      "respuesta": "lint",
+      "ventana": 8,
+      "direccion": "antes",
+      "desde": "2026-01-01",
+      "fuente": "acuerdo de equipo: nada sale a produccion sin pasar el linter",
+      "umbral": null,
+      "nota": "Ejemplo de regla 'antes de'. Medida hacia adelante daria una cifra hundida que no significa nada."
+    },
+    {
+      "id": "commit-por-unidad-cerrada",
+      "disparador": "escribir-codigo",
+      "respuesta": "git-commit",
+      "ventana": 6,
+      "desde": "2026-01-01",
+      "fuente": "habito propio: lo que no esta commiteado no existe",
+      "umbral": null,
+      "nota": "OJO CON ESTA. 'Unidad cerrada' es una intencion, no una llamada a herramienta, asi que aqui se aproxima por 'tras tocar codigo'. La cifra que salga NO responde a 'cumplo mi regla': responde a 'de cada vez que toco codigo, cuantas commiteo poco despues'. Son cosas distintas. Se deja en el ejemplo a proposito, porque esa familia de reglas es la mas comun y conviene ver como se comporta."
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+name: ci
+
+# Por que existe: es la unica vigilancia que sobrevive a que el portatil este apagado. Las tres
+# suites y la mutacion se ejecutaban a mano, o sea cuando alguien se acordaba.
+#
+# La matriz de sistemas no es adorno. `test_portabilidad.py` existe porque este banco nacio en
+# Windows y la herramienta normaliza separadores de ruta: en POSIX, el basename del sistema no
+# parte por contrabarra y la clasificacion se hundia sin dar error.
+#
+# Aviso honesto (26/07/2026): esta matriz NUNCA SE HA EJECUTADO. En local solo se ha probado con
+# Python 3.14 en Windows, y el README anuncia 3.8+. Un escaneo estatico no encontro sintaxis ni
+# biblioteca por encima de 3.8, pero eso encuentra incompatibilidades, no certifica compatibilidad.
+# Lo que la certifica es este fichero dando verde, y hasta el primer push no lo ha dado.
+
+on:
+  push:
+  pull_request:
+
+defaults:
+  run:
+    working-directory: skills/adherencia-reglas
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: ["3.9", "3.11", "3.13"]
+        # 3.8 SALIO de la matriz el 26/07. `macos-latest` es arm64 desde 2024 y
+        # `actions/setup-python` no publica 3.8 para esa arquitectura, asi que ese eje habria
+        # fallado en el primer push por el entorno, no por el codigo. Un CI que falla por su
+        # propia matriz ensena a ignorar el rojo. El README dice ahora 3.9+, que es lo que
+        # este fichero puede certificar.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Biblioteca estandar unicamente: no hay dependencias que instalar.
+      - name: Banco de logica
+        run: python run_tests_adherencia.py
+
+      - name: Banco de portabilidad
+        run: python test_portabilidad.py
+
+      # Este es el que no admite termino medio: nada del historial puede salir en la salida.
+      - name: Banco de seguridad
+        run: python test_seguridad.py
+
+      - name: La herramienta arranca y responde (exit 0)
+        run: python medir_adherencia.py -h
+
+      # La mutacion es lo que separa un banco de un adorno: sabotea el codigo y exige que el banco
+      # se ponga rojo. Sale con 1 si algun sabotaje pasa callando.
+      - name: Verificacion por mutacion
+        run: python mutar.py
+
+      # EL EJEMPLO DEL README SE EJECUTA EN CI. Si deja de reproducirse, el README miente y hay
+      # que enterarse aqui, no cuando alguien clone el repo. Es la misma regla que el resto del
+      # paquete aplica a las cifras: una tabla publicada es una afirmacion, y se comprueba.
+      - name: El ejemplo del README se reproduce
+        working-directory: .
+        run: |
+          python ejemplo/fabricar_ejemplo.py
+          python skills/adherencia-reglas/medir_adherencia.py --sesiones ejemplo/historial --reglas ejemplo/reglas_ejemplo.json
