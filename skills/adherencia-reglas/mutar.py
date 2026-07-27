@@ -145,6 +145,7 @@ def main(argv=None):
     # Los bancos que lanzo yo tienen que poder ver el residuo sin ponerse rojos: aqui es lo normal.
     entorno = dict(os.environ, MUTACION_EN_CURSO="1")
     cazadas = huecos = sin_aplicar = 0
+    nulo_ok = None
     print("=" * 78)
     print("VERIFICACION POR MUTACION  --  %d sabotajes contra %d bancos"
           % (len(MUTACIONES), len(BANCOS)))
@@ -169,6 +170,32 @@ def main(argv=None):
                 huecos += 1
                 print("  %-52s *** HUECO ***" % desc[:52])
             io.open(MEDIDO, "w", encoding="utf-8", newline="").write(original)
+
+        # CONTROL NEGATIVO DEL PROPIO ARNES (27/07/2026). Nace de una auditoria adversarial del
+        # repositorio ya publicado, que demostro que este mutador NO PODIA VER NADA: el guardian
+        # de `medir_adherencia.py` se negaba a medir mientras existiera el residuo, asi que los
+        # bancos salian rojos en las quince pasadas por el residuo y no por el sabotaje. `huecos`
+        # era inalcanzable por construccion, y una mutacion que solo cambiara el texto de un
+        # comentario tambien salia «cazada».
+        #
+        # Un arnes que dice «15 de 15» sin poder decir nunca otra cosa no mide, acompaña. Esto lo
+        # comprueba: se aplica un cambio SEMANTICAMENTE NULO, retocar el texto de una linea de
+        # comentario, y se exige que salga HUECO.
+        #
+        # VA AQUI DENTRO, CON EL RESIDUO PUESTO, y esa es la parte que importa. La primera version
+        # se escribio DESPUES del `finally`, o sea sin residuo en disco, y probaba una condicion
+        # distinta de la que sufren las quince mutaciones reales. Lo destapo su propio control
+        # negativo: con el defecto devuelto a mano, el control seguia diciendo que el arnes veia.
+        # Un control que no reproduce las condiciones del dominio medido no controla nada.
+        marca = "# -*- coding: utf-8 -*-"
+        if marca in original:
+            io.open(MEDIDO, "w", encoding="utf-8", newline="").write(
+                original.replace(marca, marca + "   # control nulo del arnes", 1))
+            rojos = [b for b in BANCOS
+                     if subprocess.run([sys.executable, b], capture_output=True,
+                                       cwd=AQUI, env=entorno).returncode != 0]
+            nulo_ok = not rojos
+            io.open(MEDIDO, "w", encoding="utf-8", newline="").write(original)
     finally:
         io.open(MEDIDO, "w", encoding="utf-8", newline="").write(original)
         # El residuo se borra AL FINAL y solo aqui: mientras exista, el arbol esta bajo sospecha y
@@ -177,12 +204,19 @@ def main(argv=None):
             os.remove(RESIDUO)
 
     print()
+    if nulo_ok is True:
+        print("  control del arnes: un cambio nulo sale HUECO, o sea que el arnes ve.")
+    elif nulo_ok is False:
+        print("  *** EL ARNES ESTA CIEGO ***: un cambio que no altera nada ha salido 'cazada'.")
+        print("  Con el arnes ciego, el 'cazadas: %d' de abajo no significa nada." % cazadas)
     print("  cazadas: %d   huecos: %d   sin aplicar: %d" % (cazadas, huecos, sin_aplicar))
     if huecos:
         print("  Un hueco no es un fallo del codigo: es una linea que el banco no vigila.")
     if sin_aplicar:
         print("  'Sin aplicar' tampoco es aprobado: esas lineas se quedaron sin probar.")
-    return 1 if (huecos or sin_aplicar) else 0
+    # El arnes ciego sale con 1 aunque los quince reales hayan ido bien: un «15 de 15» que no
+    # podia salir de otra manera es peor que un hueco, porque parece una garantia.
+    return 1 if (huecos or sin_aplicar or nulo_ok is False) else 0
 
 
 if __name__ == "__main__":

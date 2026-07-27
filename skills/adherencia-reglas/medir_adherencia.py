@@ -942,8 +942,22 @@ def main(argv=None):
     # normalmente porque mataron el proceso. Hasta hoy, medir en ese estado daba una tabla entera,
     # con exit 0 y sin una palabra: numeros creibles salidos de un motor roto a proposito. Es el
     # peor resultado posible de esta herramienta, y el mas facil de creerse.
+    #
+    # Y AQUI ESTABA EL AGUJERO, que vacio la herramienta de la ronda 9 con la proteccion de la
+    # ronda 10 (27/07/2026, lo destapo una auditoria adversarial del repositorio ya publicado).
+    # `mutar.py` deja el residuo en disco durante TODO su bucle, asi que este guardian ponia rojos
+    # los tres bancos en las quince pasadas. Rojos por el residuo, no por el sabotaje. El contador
+    # de huecos era inalcanzable por construccion: una mutacion que solo cambia el texto de un
+    # comentario tambien salia «cazada». O sea que el README ofrecia como prueba («no hay que
+    # creerselo, se ejecuta y se ve») un comando que no podia ver nada.
+    #
+    # Ningun gate del repositorio podia cazarlo, porque todos los gates SON el objeto medido.
+    #
+    # `MUTACION_EN_CURSO` ya existia y `test_seguridad.py` ya lo respetaba; este guardian se quedo
+    # sin enterarse. Lo pone `mutar.py` solo en el entorno de sus propios subprocesos, y ahi el
+    # residuo es lo normal. Fuera de esa ventana, el guardian sigue parando.
     residuo = os.path.abspath(__file__) + ".original"
-    if os.path.exists(residuo):
+    if os.path.exists(residuo) and not os.environ.get("MUTACION_EN_CURSO"):
         print("PARA: hay un %s en disco, o sea que este fichero esta MUTADO.\n"
               "Una pasada de mutar.py no llego a restaurarlo (proceso interrumpido). Cualquier\n"
               "cifra que salga ahora viene de un motor saboteado a proposito y parecera normal.\n"

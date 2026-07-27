@@ -638,7 +638,7 @@ depends on today's data gives a different answer tomorrow.
 
 ```
 cd skills/adherencia-reglas
-python run_tests_adherencia.py     # 54 cases: the logic
+python run_tests_adherencia.py     # 56 cases: the logic
 python test_portabilidad.py        # 84 cases: the tool away from home
 python test_seguridad.py           # 17 cases: that it takes nothing from your history
 python mutar.py                    # 15 sabotages: checks the benches are worth anything
