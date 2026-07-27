@@ -43,12 +43,41 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 GEMELO = "jleonceo/skill-adherencia-reglas"
 RAMA = "main"
 
-# Ficheros que PUEDEN diferir, con su motivo. La lista es corta a proposito: cada entrada es una
-# renuncia a vigilar algo, y si crece deja de haber guardian.
-SE_PERMITE_QUE_DIFIERAN = {
-    "README.md": "uno cuenta el estudio y el otro explica como se instala: son documentos distintos",
+# EL CENSO. Tres listas, y entre las tres cubren todo lo que publica cualquiera de los dos. Añadir
+# un fichero obliga a declararlo aqui, que es el momento en que alguien decide si viaja al hermano.
+VIGILADOS = [
+    ".github/workflows/ci.yml", ".gitignore", "LICENSE",
+    "ejemplo/fabricar_ejemplo.py",
+    "ejemplo/historial/sesion_regla_a_medias.jsonl",
+    "ejemplo/historial/sesion_regla_cumplida.jsonl",
+    "ejemplo/historial/sesion_regla_ignorada.jsonl",
+    "ejemplo/reglas_ejemplo.json",
+    "skills/adherencia-reglas/SKILL.md",
+    "skills/adherencia-reglas/cobertura.py",
+    "skills/adherencia-reglas/medir_adherencia.py",
+    "skills/adherencia-reglas/mutar.py",
+    "skills/adherencia-reglas/reglas.json",
+    "skills/adherencia-reglas/run_tests_adherencia.py",
+    "skills/adherencia-reglas/test_portabilidad.py",
+    "skills/adherencia-reglas/test_seguridad.py",
+]
+PUEDEN_DIFERIR = {
+    "README.md": "uno cuenta el estudio y el otro explica como se instala",
     "test_gemelo.py": "cada copia nombra al OTRO repositorio en su constante GEMELO",
 }
+SOLO_EN_UNO = {
+    ".claude-plugin/marketplace.json": "el manifiesto de plugin, solo en el paquete",
+    "skills/adherencia-reglas/LICENSE": "la licencia dentro de la skill empaquetada",
+}
+DECLARADOS = set(VIGILADOS) | set(PUEDEN_DIFERIR) | set(SOLO_EN_UNO)
+
+
+def _andar(raiz):
+    """`os.walk` con el error ARRIBA. Sin `onerror` se tragaba una carpeta ilegible y perdia su
+    subarbol entero sin imprimir una linea."""
+    def reventar(err):
+        raise err
+    return os.walk(raiz, onerror=reventar)
 
 
 def _sha(datos):
@@ -70,7 +99,7 @@ LOCAL = os.environ.get("GEMELO_LOCAL")
 def _listar_remoto():
     if LOCAL:
         fuera = set()
-        for raiz, dirs, ficheros in os.walk(LOCAL):
+        for raiz, dirs, ficheros in _andar(LOCAL):
             dirs[:] = [d for d in dirs if d not in (".git", "__pycache__")]
             for f in ficheros:
                 fuera.add(os.path.relpath(os.path.join(raiz, f), LOCAL).replace(os.sep, "/"))
@@ -78,6 +107,11 @@ def _listar_remoto():
     arbol = json.loads(_pedir(
         "https://api.github.com/repos/%s/git/trees/%s?recursive=1" % (GEMELO, RAMA)
     ).decode("utf-8"))
+    if arbol.get("truncated"):
+        raise RuntimeError("la API corto el arbol del gemelo: la lista esta incompleta")
+    raros = [n.get("path") for n in arbol.get("tree", []) if n.get("type") not in ("blob", "tree")]
+    if raros:
+        raise RuntimeError("nodos que no son fichero ni carpeta (submodulos?): %s" % raros)
     return set(n["path"] for n in arbol.get("tree", []) if n.get("type") == "blob")
 
 
@@ -98,6 +132,16 @@ def main():
     print("=" * 78)
 
     if LOCAL:
+        # Era un interruptor de apagado: `GEMELO_LOCAL=.` comparaba el repositorio consigo mismo y
+        # daba verde siempre, con los contadores identicos. Y puesto en el flujo de CI de los dos,
+        # el guardian aprobaba el commit que lo desactivaba.
+        if os.path.realpath(LOCAL) == os.path.realpath(AQUI):
+            print("  GEMELO_LOCAL apunta a este mismo repositorio. Eso no es un gemelo. Sale con 2.")
+            return 2
+        if os.environ.get("CI"):
+            print("  GEMELO_LOCAL dentro de un flujo de CI: ahi la comparacion va contra el")
+            print("  servidor, y un clon local la convierte en un interruptor de apagado.")
+            return 2
         print("  (comparando contra el clon local %s, no contra el servidor)" % LOCAL)
     try:
         remotos = _listar_remoto()
@@ -112,16 +156,32 @@ def main():
         return 2
 
     locales = set()
-    for raiz, dirs, ficheros in os.walk(AQUI):
+    for raiz, dirs, ficheros in _andar(AQUI):
         dirs[:] = [d for d in dirs if d not in (".git", "__pycache__")]
         for f in ficheros:
             rel = os.path.relpath(os.path.join(raiz, f), AQUI).replace(os.sep, "/")
             locales.add(rel)
 
-    comunes = sorted(remotos & locales)
-    distintos, no_leidos = [], []
-    for rel in comunes:
-        if rel in SE_PERMITE_QUE_DIFIERAN:
+    quejas, no_leidos = [], []
+
+    # 1. Lo declarado tiene que ESTAR en los dos: aqui se cazan las bajas, los renombrados, los
+    #    cambios de caja y un arbol del gemelo movido bajo otro prefijo.
+    for rel in VIGILADOS:
+        if rel not in locales:
+            quejas.append("declarado y NO esta aqui: %s" % rel)
+        if rel not in remotos:
+            quejas.append("declarado y NO esta en el gemelo: %s" % rel)
+
+    # 2. Lo que aparece sin declarar tambien suspende. Un guardian que solo mira lo que ya conoce
+    #    deja de vigilar en cuanto alguien añade algo.
+    for rel in sorted((locales | remotos) - DECLARADOS):
+        if rel.startswith(".git/"):
+            continue
+        quejas.append("sin declarar, decide si tiene que viajar al gemelo: %s" % rel)
+
+    # 3. Y lo declarado que esta en los dos, que coincida.
+    for rel in VIGILADOS:
+        if rel not in locales or rel not in remotos:
             continue
         try:
             remoto = _leer_remoto(rel)
@@ -130,19 +190,26 @@ def main():
             continue
         local = io.open(os.path.join(AQUI, rel.replace("/", os.sep)), "rb").read()
         if _sha(local) != _sha(remoto):
-            distintos.append(rel)
+            quejas.append("SEPARADOS: %s" % rel)
 
-    print("  comunes: %d   vigilados: %d   exentos: %d"
-          % (len(comunes), len(comunes) - len([c for c in comunes if c in SE_PERMITE_QUE_DIFIERAN]),
-             len([c for c in comunes if c in SE_PERMITE_QUE_DIFIERAN])))
+    print("  vigilados: %d   pueden diferir: %d   solo en uno: %d"
+          % (len(VIGILADOS), len(PUEDEN_DIFERIR), len(SOLO_EN_UNO)))
 
-    solo_aqui = sorted(locales - remotos - set([".gitignore"]))
-    solo_aqui = [f for f in solo_aqui if not f.startswith(".git/")]
-    if solo_aqui:
+    # El orden importa: la separacion se imprime ANTES que los fallos de lectura. Al reves, un
+    # error 500 en un fichero cualquiera tapaba el unico mensaje que este guardian existe para dar.
+    if quejas:
         print()
-        print("  solo en este repositorio (empaquetado, no se exige):")
-        for f in solo_aqui:
-            print("    %s" % f)
+        print("  *** LOS GEMELOS SE HAN SEPARADO ***")
+        for q in quejas:
+            print("    %s" % q)
+        if no_leidos:
+            print()
+            for rel, e in no_leidos:
+                print("    NO LEIDO  %s  (%s)" % (rel, e))
+        print()
+        print("  Si acabas de arreglar algo aqui, subelo tambien al otro. La ventana entre los dos")
+        print("  push es la unica en la que este rojo es esperado, y el CI la reintenta.")
+        return 1
 
     if no_leidos:
         print()
@@ -151,19 +218,9 @@ def main():
         print("  Un fichero que no se pudo leer no es un fichero que coincida.")
         return 2
 
-    if distintos:
-        print()
-        print("  *** LOS GEMELOS SE HAN SEPARADO ***")
-        for f in distintos:
-            print("    %s" % f)
-        print()
-        print("  Si acabas de arreglar algo aqui, subelo tambien al otro. Si acabas de subirlo al")
-        print("  otro, este banco se pondra verde solo en cuanto llegue: la ventana entre los dos")
-        print("  push es la unica en la que este rojo es esperado.")
-        return 1
-
     print()
-    print("  Los dos arboles coinciden en todo lo vigilado.")
+    print("  Los %d ficheros vigilados coinciden, y no ha aparecido ninguno sin declarar."
+          % len(VIGILADOS))
     return 0
 
 

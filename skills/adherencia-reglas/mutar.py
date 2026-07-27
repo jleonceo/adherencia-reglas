@@ -188,6 +188,15 @@ def main(argv=None):
         # negativo: con el defecto devuelto a mano, el control seguia diciendo que el arnes veia.
         # Un control que no reproduce las condiciones del dominio medido no controla nada.
         marca = "# -*- coding: utf-8 -*-"
+        # EL CONTROL FALLABA ABIERTO, Y AQUI SE ARREGLO DOS DIAS TARDE. Si la marca no estaba,
+        # la comprobacion se saltaba entera, `nulo_ok` se quedaba en None y el arnes salia con
+        # CERO sin haber demostrado que ve. `pyupgrade` borra esa cookie de serie desde que el
+        # PEP 3120 la volvio redundante, o sea que un linter anulaba el aval de los quince
+        # sabotajes en silencio. El arreglo se aplico primero al repositorio hermano y esta copia
+        # se quedo atras: el mismo defecto que este paquete persigue, cometido al arreglarlo.
+        if marca not in original:
+            print("  control nulo: NO SE PUDO APLICAR. El ancla que usa ya no esta en el fichero")
+            print("  medido, asi que el arnes se queda sin demostrar que distingue.")
         if marca in original:
             io.open(MEDIDO, "w", encoding="utf-8", newline="").write(
                 original.replace(marca, marca + "   # control nulo del arnes", 1))
@@ -206,6 +215,9 @@ def main(argv=None):
     print()
     if nulo_ok is True:
         print("  control del arnes: un cambio nulo sale HUECO, o sea que el arnes ve.")
+    elif nulo_ok is None:
+        print("  control nulo: NO EJECUTADO. Las %d cazadas de arriba no prueban nada mientras" % cazadas)
+        print("  el arnes no ensene que tambien sabe decir HUECO. Sale con 1 a proposito.")
     elif nulo_ok is False:
         print("  *** EL ARNES ESTA CIEGO ***: un cambio que no altera nada ha salido 'cazada'.")
         print("  Con el arnes ciego, el 'cazadas: %d' de abajo no significa nada." % cazadas)
@@ -216,7 +228,8 @@ def main(argv=None):
         print("  'Sin aplicar' tampoco es aprobado: esas lineas se quedaron sin probar.")
     # El arnes ciego sale con 1 aunque los quince reales hayan ido bien: un «15 de 15» que no
     # podia salir de otra manera es peor que un hueco, porque parece una garantia.
-    return 1 if (huecos or sin_aplicar or nulo_ok is False) else 0
+    # `is not True`, no `is False`: el None tambien suspende, y esa distincion ES el arreglo.
+    return 1 if (huecos or sin_aplicar or nulo_ok is not True) else 0
 
 
 if __name__ == "__main__":
