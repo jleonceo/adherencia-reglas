@@ -13,9 +13,9 @@ compatibility: >
   documentación de Anthropic declara interno y sujeto a cambios entre versiones. Probada contra
   Claude Code 2.x en julio de 2026. Python 3.9+, biblioteca estándar, sin red. Solo lectura.
 metadata:
-  version: "1.0"
+  version: "1.1"
   validated_with: claude-opus-5
-  validation_date: "2026-07-25"
+  validation_date: "2026-07-27"
 ---
 
 # adherencia-reglas: el espejo de las normas propias
@@ -73,7 +73,7 @@ El nombre de la carpeta lo pone Claude Code a partir de la ruta de trabajo, así
 | `--json` | salida para encadenar con otra cosa |
 
 **Las dos vistas que no conviene saltarse.** Una tasa global miente por omisión en dos direcciones.
-`--curva-ventana` enseña que el plazo elegido mueve la cifra casi treinta puntos, del 49,7 % con
+`--curva-ventana` enseña que el plazo elegido mueve la cifra treinta y tres puntos, del 49,7 % con
 ventana 2 al 83,0 % con ventana 40 sobre los mismos datos. Y `--por-dia` enseña lo que el promedio
 tapa: la puerta de salida se cumplió el **91 %** el 22 de julio, que es el día en que se cableó,
 sobre 76 ocasiones, y el **25 %** al día siguiente sobre solo 4. Ese 25 % no es una caída medida: el
@@ -84,8 +84,10 @@ alguien se quejó de ese parámetro en concreto. Una auditoría que miraba el ra
 jornada en lugar de sus defectos hizo la pregunta general: **qué otros números de esta herramienta son un umbral
 elegido a ojo y publicado sin su sensibilidad**. Había dos más, el colapso de rachas y la muestra
 mínima, y ninguna de las cuatro rondas de revisión los tocó, porque cada ronda reaccionó a una queja
-concreta y nadie generalizó. Esta vista los enseña los tres a la vez, y un caso del banco falla si
-alguien añade un parámetro nuevo sin meterlo aquí.
+concreta y nadie generalizó. La vista los enseña **los cuatro** a la vez, contando el de si la
+respuesta tiene que caer en el mismo ámbito, que el propio bloque llama el supuesto más grande del
+instrumento. Aquí ponía «los tres», heredado de cuando ese cuarto se numeró «2-bis» para no tocar la
+cuenta. Un caso del banco falla si alguien añade un parámetro nuevo sin meterlo aquí.
 
 El colapso no es cosmético: sobre el historial de este proyecto, una regla pasa del 57,1 % al 20,0 %
 según se cuente una racha de escrituras como una ocasión o como varias.

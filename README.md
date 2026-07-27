@@ -58,7 +58,7 @@ algo no existe».
 
 Todas se leen. Ninguna se cuenta.
 
-El caso que originó esto: una regla con hook propio y skill dueña, escrita hacía tres días, se cumplía
+El caso que originó esto: una regla con hook propio y skill dueña, cableada el 22/07/2026, se cumplía
 **en 103 de 132 ocasiones, el 78,0 %** (medido el 27/07/2026 con esta misma versión del código, sobre
 un historial privado que tú no tienes: lo que sí puedes reproducir es el ejemplo de más abajo). La
 sospecha existía desde antes. El número no. Sin número no se decide nada: ni reforzar la regla, ni
@@ -163,13 +163,15 @@ cuanto lo apuntes a tu historial de verdad, es el primer campo que hay que añad
 **`direccion`** distingue «después de X haz Y» de «haz Y antes de X». Muchas obligaciones son del
 segundo tipo, y medidas al revés se hunden: una de ellas daba 7,7 % mal planteada y 36,4 % bien.
 
-**`ventana`** es en cuántos pasos vale la respuesta. Mueve la cifra casi treinta puntos, así que la
+**`ventana`** es en cuántos pasos vale la respuesta. Mueve la cifra treinta y tres puntos, así que la
 herramienta trae `--curva-ventana` para que puedas enseñarla junto al número.
 
 ### Lo primero que tienes que cambiar: las acciones
 
 Una regla se declara como «tras el disparador X debe venir la respuesta Y», y X e Y salen de un mapa
-que traduce llamadas a herramienta en verbos. De fábrica vienen **quince**, y conviene saber de
+que traduce llamadas a herramienta en verbos. De fábrica vienen **quince**, aunque con el
+`reglas.json` que trae el paquete solo doce están activas: las tres que dependen de tus carpetas
+de doctrina llegan con las listas vacías, y el propio fichero explica por qué. Conviene saber de
 dónde sale cada una porque no todas valen lo mismo fuera de aquí:
 
 | Cuántas | Cuáles | De dónde salen | ¿Valen en tu proyecto? |
@@ -359,7 +361,7 @@ identificador de bloque.
 
 ### Requisitos
 
-Python 3.9 o superior. Biblioteca estándar, nada más. La versión mínima es la que el CI certifica, en vez de la que el código parece admitir.
+Python 3.9 o superior. Biblioteca estándar, nada más. **Ese 3.9 está declarado, no certificado:** el flujo de CI que lo probaría no se ha ejecutado nunca, porque el repositorio se publica hoy. Aquí se ha ejecutado con 3.14 y 3.13 sobre Windows. La matriz certifica el suelo en cuanto haya un primer push, y hasta entonces el suelo es lo que el código admite a la vista, no lo que nadie ha comprobado.
 
 ### Verificado en
 
@@ -424,8 +426,8 @@ doesn't exist».
 
 They all get read. None get counted.
 
-The case that started this: a rule with its own hook and its own owning skill, written three days
-earlier, was followed **in 103 out of 132 opportunities, 78.0 %** (measured on 27 July 2026 with this
+The case that started this: a rule with its own hook and its own owning skill, wired on 22/07/2026,
+was followed **in 103 out of 132 opportunities, 78.0 %** (measured on 27 July 2026 with this
 same version of the code, over a private history you do not have: what you can reproduce is the
 example below). The day it was first measured, that same rule read 24 % in the morning and 80 % in
 the afternoon, and none of the intermediate versions was miscalculated: each measured a different
@@ -442,6 +444,33 @@ network, no dependencies.
 ```
 python skills/adherencia-reglas/medir_adherencia.py --sesiones "~/.claude/projects/MY-PROJECT"
 ```
+
+The package ships an example you can reproduce right now, without touching your own history:
+
+```bash
+python ejemplo/fabricar_ejemplo.py
+python skills/adherencia-reglas/medir_adherencia.py --sesiones ejemplo/historial --reglas ejemplo/reglas_ejemplo.json
+```
+
+The first writes three toy sessions with a behaviour decided by hand. The second measures them. This
+is what comes out. It will come out the same for you:
+
+```
+  regla                           tocaba  cumplio     tasa  umbral
+  ----------------------------------------------------------------------------
+  gate-tras-escribir-doc              11        8  72.7 %
+  suite-tras-tocar-codigo              4        1  25.0 %*
+```
+
+`(*)` marks the ones with fewer than ten opportunities. That is not a rate, it is an anecdote with
+decimals, and the tool says so on its own so that nobody quotes a 100 % built on two cases.
+
+The example is generated rather than shipped as fixed text on purpose: if the generator and the
+measurer ever disagree, the table changes and the CI notices. A committed output file would agree
+with itself forever.
+
+*This whole block existed only in the Spanish half until 27/07/2026. A foreign reader was handed the
+claims and not the one thing they could check for themselves.*
 
 ### What the number is for
 
@@ -489,7 +518,7 @@ someone.
 **`direccion`** separates «after X do Y» from «do Y before X». Many obligations are the second kind,
 and measured backwards they collapse: one read 7.7 % stated wrongly and 36.4 % stated right.
 
-**`ventana`** is how many steps the response has. It moves the figure by nearly thirty points, so
+**`ventana`** is how many steps the response has. It moves the figure by thirty-three points, so
 `--curva-ventana` exists to show that curve alongside the number.
 
 ### Change the actions first
@@ -673,7 +702,7 @@ numbers come out quietly wrong. This tool deduplicates by block id.
 
 ### Requirements
 
-Python 3.9+. Standard library only. The floor is what CI certifies, not what the code appears to accept.
+Python 3.9+. Standard library only. **That 3.9 is declared, not certified:** the CI matrix that would prove it has never run, because the repository is being published today. It has been run here on 3.14 and 3.13 under Windows. The matrix certifies the floor as soon as there is a first push; until then the floor is what the code accepts on inspection, not what anyone has verified.
 
 ### Tested on
 

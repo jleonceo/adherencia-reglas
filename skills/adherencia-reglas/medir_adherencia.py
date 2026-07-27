@@ -892,7 +892,7 @@ def main(argv=None):
                          "mueve mas que la diferencia que quieres defender, esa cifra no aguanta")
     ap.add_argument("--curva-ventana", action="store_true",
                     help="muestra como cambia la tasa con la ventana: sin esto, un numero suelto "
-                         "esconde que el parametro lo mueve casi 30 puntos")
+                         "esconde que el parametro lo mueve 33 puntos")
     ap.add_argument("--json", action="store_true", help="salida en JSON para encadenar")
     ap.add_argument("--acciones", action="store_true",
                     help="vuelca las acciones detectadas en TU historial, con su frecuencia. "
