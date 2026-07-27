@@ -294,12 +294,12 @@ aquí hacen falta más días con muestra suficiente.
 
 ### Verificación
 
-155 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
+157 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
 de los datos de hoy cambia de resultado mañana.
 
 ```
 cd skills/adherencia-reglas
-python run_tests_adherencia.py     # 54 casos: la lógica
+python run_tests_adherencia.py     # 56 casos: la lógica
 python test_portabilidad.py        # 84 casos: la herramienta fuera de su casa
 python test_seguridad.py           # 17 casos: que no se lleve nada de tu historial
 python mutar.py                    # 15 sabotajes: comprueba que los bancos sirven
@@ -633,7 +633,7 @@ here needs more days with a real sample.
 
 ### Verification
 
-155 cases across three benches, over fabricated traces and never over the real history: a bench that
+157 cases across three benches, over fabricated traces and never over the real history: a bench that
 depends on today's data gives a different answer tomorrow.
 
 ```

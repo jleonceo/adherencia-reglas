@@ -315,6 +315,45 @@ class TestCeroSilencioso(Base):
         r = m.medir([p], [regla])[0]
         self.assertEqual((r["disparadores"], r["cumplidos"]), (1, 1))
 
+    def test_22_un_cero_de_vocabulario_se_distingue_de_uno_de_conducta(self):
+        """El defecto que el paquete existe para cazar, cometido en su salida por defecto.
+
+        POR QUE (27/07/2026). Dos pruebas de usuario ciego, por caminos distintos y el mismo dia,
+        llegaron al mismo sitio: una regla cuya accion de respuesta NO APARECE NI UNA VEZ en el
+        historial devuelve `0.0 %` limpio, sin asterisco y sin nota, y se lee como incumplimiento.
+        La causa real es de vocabulario. El programa tenia el dato y se callaba.
+
+        `vistas_respuesta` es ese dato: cuantas veces aparece la respuesta en TODO el historial,
+        no solo dentro de las ventanas. Cero significa "aqui esa accion no existe".
+        """
+        p = self.sesion("s.jsonl", [linea("Bash", {"command": "git add x"}, "b1", "m1"),
+                                    linea("Bash", {"command": "git add y"}, "b2", "m2")])
+        regla = {"id": "vocabulario-ajeno", "disparador": "git-add", "respuesta": "git-push",
+                 "ventana": 3, "desde": "2000-01-01"}
+        r = m.medir([p], [regla])[0]
+        self.assertEqual(r["tasa"], 0.0)
+        self.assertEqual(r["vistas_respuesta"], 0,
+                         "sin este contador el cero de vocabulario es indistinguible del de conducta")
+
+    def test_23_control_el_cero_de_conducta_NO_se_marca(self):
+        """Control negativo, y es el que sujeta el caso de arriba.
+
+        Un aviso que salta siempre que la tasa es cero no vale para nada: hay que probar que
+        distingue. Aqui la respuesta SI existe en el historial, solo que fuera de la ventana. Eso
+        es incumplimiento de verdad y no se debe marcar como problema de vocabulario.
+        """
+        p = self.sesion("s.jsonl", [linea("Bash", {"command": "git add x"}, "b1", "m1"),
+                                    linea("Read", {"file_path": "a.py"}, "b2", "m2"),
+                                    linea("Read", {"file_path": "b.py"}, "b3", "m3"),
+                                    linea("Read", {"file_path": "c.py"}, "b4", "m4"),
+                                    linea("Bash", {"command": "git push"}, "b5", "m5")])
+        regla = {"id": "push-tras-add", "disparador": "git-add", "respuesta": "git-push",
+                 "ventana": 1, "desde": "2000-01-01"}
+        r = m.medir([p], [regla])[0]
+        self.assertEqual(r["tasa"], 0.0, "la ventana de 1 no llega al push")
+        self.assertGreater(r["vistas_respuesta"], 0,
+                           "el push SI esta en el historial: este cero es de conducta, no de vocabulario")
+
 
 
 

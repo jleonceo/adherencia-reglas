@@ -761,7 +761,7 @@ def medir(paths, reglas, colapsar=True, rx_shell=None, acciones=None, carpetas=N
     for r in reglas:
         corte = _fecha(r["desde"]) if r.get("desde") else 0.0
         ventana = int(r.get("ventana", 6))
-        disp = cumpl = ilegibles = filtrados = 0
+        disp = cumpl = ilegibles = filtrados = vistas_resp = 0
         for p in paths:
             if corte:
                 ts, _ = fecha_de_sesion(p)
@@ -776,6 +776,10 @@ def medir(paths, reglas, colapsar=True, rx_shell=None, acciones=None, carpetas=N
                 continue
             ambito = r.get("ambito") or []
             acciones = [x[0] for x in seq]
+            # CUANTAS VECES APARECE LA RESPUESTA EN TODO EL HISTORIAL, no solo dentro de las
+            # ventanas. Es el dato que separa "no lo hiciste" de "aqui esa accion no existe", y
+            # se cuenta aqui porque `acciones` ya esta construida.
+            vistas_resp += acciones.count(r["respuesta"])
             for i, (a, rutas) in enumerate(seq):
                 if a != r["disparador"]:
                     continue
@@ -814,7 +818,7 @@ def medir(paths, reglas, colapsar=True, rx_shell=None, acciones=None, carpetas=N
         salida.append({"id": r["id"], "disparador": r["disparador"], "respuesta": r["respuesta"],
                        "fuente": r.get("fuente", ""), "umbral": r.get("umbral"),
                        "disparadores": disp, "cumplidos": cumpl, "ilegibles": ilegibles,
-                       "filtrados_por_ambito": filtrados,
+                       "filtrados_por_ambito": filtrados, "vistas_respuesta": vistas_resp,
                        "tasa": (100.0 * cumpl / disp) if disp else None})
     return salida
 
@@ -999,7 +1003,7 @@ def main(argv=None):
             # `~/.claude/projects` NO son etiquetas: son la ruta de trabajo de cada proyecto
             # codificada, asi que decirlas publica en que trabaja quien ejecuta esto. Un auditor
             # lo enseño con un historial fabricado y salio
-            # `C--Users-EncarnacionVillalobos-clientes-DESPIDO-CONFIDENCIAL` por las SEIS vistas,
+            # `C--Users-Fulano-clientes-DESPIDO-CONFIDENCIAL` por las SEIS vistas,
             # incluida la tabla normal. Contradecia lo que el README acababa de prometer en ese
             # mismo commit: que fuera de `--acciones` la promesa es entera.
             #
@@ -1076,7 +1080,7 @@ def main(argv=None):
 
     if args.por_dia is not None:
         # POR QUE EXISTE (25/07/2026). La tasa global de la puerta era 62,7 %, y desglosada por dia
-        # aparecio lo que el agregado tapaba: 85 % el 22/07, que es el dia en que se cableo, y 25 %
+        # aparecio lo que el agregado tapaba: 91 % el 22/07, que es el dia en que se cableo, y 25 %
         # al dia siguiente. Una regla nueva se cumple mientras se recuerda. Eso no se ve en un
         # numero unico, y es justo lo que hay que saber para decidir si necesita mecanismo.
         import collections, datetime as _dt
@@ -1266,6 +1270,19 @@ def main(argv=None):
                                                r["cumplidos"], tasa, umbral))
             if r["fuente"]:
                 print("      %s" % r["fuente"])
+            # EL CERO DE VOCABULARIO (27/07/2026). Este es el defecto que el paquete existe para
+            # cazar y lo cometia en su propia salida por defecto. Si la accion de respuesta NO
+            # APARECE NI UNA VEZ en todo el historial medido, la tasa sale 0,0 % limpia, sin
+            # asterisco y sin nota, y se lee como incumplimiento. La causa casi siempre es otra:
+            # esa accion no forma parte del vocabulario de quien mide, o su patron no casa con
+            # nada. El programa TENIA el dato y se callaba. Lo destaparon dos pruebas de usuario
+            # ciego el mismo dia, por caminos distintos: una con el `reglas.json` de fabrica y
+            # otra con reglas propias.
+            if r["tasa"] == 0.0 and r["vistas_respuesta"] == 0:
+                print("      AVISO: la accion '%s' no aparece NI UNA VEZ en este historial."
+                      % r["respuesta"])
+                print("      Ese 0 % es de VOCABULARIO, no de conducta. Ejecuta --acciones para")
+                print("      ver que nombres reconoce aqui y ajusta la regla, o quitala.")
             # EL CERO SILENCIOSO (descubierto el 25/07 probando controles). Si el ambito filtra
             # TODOS los disparadores, la tasa sale n/d y parece que la regla no se activo nunca.
             # La causa real suele ser otra: el ambito filtra por RUTA, y una accion de consola no

@@ -184,10 +184,10 @@ cosas, que es justamente lo que aquí se hace.
 
 ## Banco
 
-Son **tres bancos y 155 casos**, todos sobre trazas fabricadas y nunca sobre el historial real: un banco
+Son **tres bancos y 157 casos**, todos sobre trazas fabricadas y nunca sobre el historial real: un banco
 que dependa de los datos de hoy cambia de resultado mañana.
 
-`run_tests_adherencia.py` lleva 54 casos y prueba la lógica.
+`run_tests_adherencia.py` lleva 56 casos y prueba la lógica.
 
 **Y los tres bancos están verificados por mutación, que es lo que separa un banco de un adorno.** No
 hay que creérselo: `python mutar.py` lo hace delante de quien lo ejecute, quince sabotajes contra los
