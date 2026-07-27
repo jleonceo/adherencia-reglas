@@ -122,8 +122,8 @@ def _rescatar_residuo():
     """
     if not os.path.exists(RESIDUO):
         return False
-    io.open(MEDIDO, "w", encoding="utf-8", newline="\n").write(
-        io.open(RESIDUO, encoding="utf-8").read())
+    io.open(MEDIDO, "w", encoding="utf-8", newline="").write(
+        io.open(RESIDUO, encoding="utf-8", newline="").read())
     os.remove(RESIDUO)
     print("  [!] La ejecucion anterior murio con una mutacion puesta. Fichero RESTAURADO.")
     print("      (si te extraña: eso es lo que pasa al matar el proceso a mitad)")
@@ -140,8 +140,8 @@ def main(argv=None):
             print("  %s" % desc)
         return 0
 
-    original = io.open(MEDIDO, encoding="utf-8").read()
-    io.open(RESIDUO, "w", encoding="utf-8", newline="\n").write(original)
+    original = io.open(MEDIDO, encoding="utf-8", newline="").read()
+    io.open(RESIDUO, "w", encoding="utf-8", newline="").write(original)
     # Los bancos que lanzo yo tienen que poder ver el residuo sin ponerse rojos: aqui es lo normal.
     entorno = dict(os.environ, MUTACION_EN_CURSO="1")
     cazadas = huecos = sin_aplicar = 0
@@ -155,7 +155,7 @@ def main(argv=None):
                 print("  %-52s SIN APLICAR (el codigo cambio)" % desc[:52])
                 sin_aplicar += 1
                 continue
-            io.open(MEDIDO, "w", encoding="utf-8", newline="\n").write(
+            io.open(MEDIDO, "w", encoding="utf-8", newline="").write(
                 original.replace(viejo, nuevo, 1))
             rojos = []
             for b in BANCOS:
@@ -168,9 +168,9 @@ def main(argv=None):
             else:
                 huecos += 1
                 print("  %-52s *** HUECO ***" % desc[:52])
-            io.open(MEDIDO, "w", encoding="utf-8", newline="\n").write(original)
+            io.open(MEDIDO, "w", encoding="utf-8", newline="").write(original)
     finally:
-        io.open(MEDIDO, "w", encoding="utf-8", newline="\n").write(original)
+        io.open(MEDIDO, "w", encoding="utf-8", newline="").write(original)
         # El residuo se borra AL FINAL y solo aqui: mientras exista, el arbol esta bajo sospecha y
         # `test_seguridad.py` lo dice en rojo. Borrarlo antes seria apagar la alarma.
         if os.path.exists(RESIDUO):

@@ -855,17 +855,27 @@ def sesiones_en(raiz, subagentes=False):
 
 
 def _veredicto(res):
-    """0 si todas las reglas con umbral lo cumplen, 1 si alguna no.
+    """0 si todas las reglas con umbral lo cumplen, 1 si alguna no, 2 si no se pudo medir nada.
 
     Vive aparte porque las tres vistas tienen que dar el MISMO veredicto. Antes solo la tabla por
     defecto miraba los umbrales y las otras dos salian siempre en 0: quien pusiera `--por-dia` en
     un paso de CI se quedaba sin gate sin enterarse.
+
+    EL SEGUNDO EJE, EL DE "NO SE PUDO MEDIR" (27/07/2026). La correccion de arriba igualo el eje
+    del UMBRAL y dejo suelto el otro. Ante un historial ilegible, `--acciones` devolvia 2 y las
+    otras tres vistas devolvian 0: el mismo binario, los mismos datos, dos veredictos. Y el 0 es
+    el peor de los dos, porque en un paso de CI "no se pudo medir" pasaba por "todo correcto".
+    Lo destapo una prueba de clon frio. Si NINGUNA regla tiene tasa, no hay medicion que juzgar.
     """
     bajos = [r for r in res if r.get("umbral") is not None and r.get("tasa") is not None
              and r["tasa"] < r["umbral"]]
     if bajos:
         print("\nPor debajo de su umbral: %s" % ", ".join(r["id"] for r in bajos))
         return 1
+    if res and all(r.get("tasa") is None for r in res):
+        print("\nNinguna regla se pudo medir: no hay ocasiones en las que tocara aplicarla. "
+              "Eso no es un cero, es ausencia de dato.")
+        return 2
     return 0
 
 

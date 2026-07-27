@@ -616,6 +616,29 @@ class TestLosNueveMenoresDeLaRonda10(Base):
                                  "--reglas", self._reglas({"reglas": [alto]}), "--acciones"]), 0,
                          "`--acciones` devuelve error sin ninguna regla incumplida")
 
+    def test_44b_las_cuatro_vistas_coinciden_cuando_NO_SE_PUDO_MEDIR(self):
+        """El segundo eje del mismo defecto, y el peor de los dos (27/07/2026).
+
+        El caso de arriba iguala las vistas en el eje del UMBRAL. Quedaba suelto el otro: ante un
+        historial ilegible, `--acciones` devolvia 2 y las otras tres devolvian 0. El mismo binario,
+        los mismos datos, dos veredictos. Y el 0 es el peligroso, porque en un paso de CI "no se
+        pudo medir" pasaba por "todo correcto". Lo destapo una prueba de clon frio.
+        """
+        with io.open(os.path.join(self.tmp, "roto.jsonl"), "w", encoding="utf-8") as fh:
+            fh.write('{"esto no es json\n')
+        reglas = self._reglas({"reglas": [dict(REGLA, umbral=None)]})
+        for vista in ([], ["--acciones"], ["--json"], ["--por-dia", "7"]):
+            self.assertEqual(
+                m.main(["--sesiones", self.tmp, "--reglas", reglas] + vista), 2,
+                "la vista %r no dice que no se pudo medir" % (vista or "por defecto"))
+
+    def test_44c_un_historial_LEGIBLE_sigue_saliendo_con_cero(self):
+        """Control negativo del anterior. Sin este caso, devolver 2 siempre pasaria los dos."""
+        self.sesion("s.jsonl", [self.escribir_doc("b1"), self.gate("b1")])
+        reglas = self._reglas({"reglas": [dict(REGLA, umbral=None)]})
+        self.assertEqual(m.main(["--sesiones", self.tmp, "--reglas", reglas]), 0,
+                         "una regla que se pudo medir y cumple no es un error")
+
     def test_45_un_id_con_salto_de_linea_no_falsifica_una_fila(self):
         """La tabla se alinea por columnas, asi que un `\\n` parte la fila y la mitad de abajo se
         lee como otra regla que no midio nada. No da error y no hay uso legitimo."""
