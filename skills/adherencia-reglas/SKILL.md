@@ -78,8 +78,8 @@ tapa: la puerta de salida se cumplió el **85 %** el 22 de julio, que es el día
 cayó al **25 %** al día siguiente. Una regla nueva se cumple mientras se recuerda.
 
 **`--sensibilidad` existe por un hallazgo incómodo.** La opción `--curva-ventana` se escribió porque
-alguien se quejó de ese parámetro en concreto. Una auditoría del razonamiento de la jornada, no de
-sus defectos, hizo la pregunta general: **qué otros números de esta herramienta son un umbral
+alguien se quejó de ese parámetro en concreto. Una auditoría que miraba el razonamiento de la
+jornada en lugar de sus defectos hizo la pregunta general: **qué otros números de esta herramienta son un umbral
 elegido a ojo y publicado sin su sensibilidad**. Había dos más, el colapso de rachas y la muestra
 mínima, y ninguna de las cuatro rondas de revisión los tocó, porque cada ronda reaccionó a una queja
 concreta y nadie generalizó. Esta vista los enseña los tres a la vez, y un caso del banco falla si
@@ -138,7 +138,7 @@ esta misma familia. Si declaras una así, ponle el aviso tú.
 
 **Una línea del historial no es una llamada.** El formato agrupa los trozos de streaming por
 identificador de mensaje, así que la misma llamada aparece varias veces. El instrumento deduplica.
-Sin eso, el recuento se infla un 58 % y no de forma uniforme, o sea que deforma cualquier curva. Es
+Sin eso, el recuento se infla un 58 % de forma desigual, o sea que deforma cualquier curva. Es
 el fallo que tenía dentro el observatorio de degradación de este mismo proyecto, donde llegaba al
 288 %. No daba ningún síntoma: los números salían mal en silencio.
 
@@ -149,9 +149,9 @@ búscalo» tiene como disparador una **intención**. Una intención no deja huel
 escribe. Aproximarla por «escribir un documento» produce un denominador enorme y una tasa hundida que
 no significa nada. Por eso el ejemplo que viene en el paquete no la incluye.
 
-Para esa familia de reglas hay otra vía, y esta herramienta no la cubre: si la regla tiene un hook
-que la bloquea, el bloqueo queda escrito en el transcript y se puede contar por separado. Son
-incidentes cazados, no ocasiones cumplidas.
+Para esa familia de reglas hay otra vía que esta herramienta no cubre: si la regla tiene un hook
+que la bloquea, el bloqueo queda escrito en el transcript y se puede contar por separado. Eso son
+incidentes cazados y no ocasiones cumplidas.
 
 **Son métricas distintas y conviene no mezclarlas.** Aquí se cuenta una tasa sobre las ocasiones en
 que tocaba. Allí se cuentan incidentes cazados por un hook. Una regla sin hook y sin rastro de
@@ -207,8 +207,8 @@ código. Arreglar la mitad de un defecto deja la otra mitad con aspecto de estar
 **Declarar un nombre que ya existe lo AMPLÍA, no lo sustituye.** El propio se prueba primero y el de
 fábrica sigue detrás. El README prometía «redefinir»; se probó a hacerlo verdad y rompió seis casos
 de este banco, porque lo que hace falta es ampliar: `eval_golden` es OTRA forma de ejecutar una suite
-además de `pytest`, no en lugar de ella. Se corrigió la promesa, no la conducta, y ahora se avisa por
-pantalla cuando ocurre.
+que se suma a `pytest` en vez de sustituirla. Lo que se corrigió fue la promesa y la conducta se
+quedó como estaba, con un aviso por pantalla cuando ocurre.
 
 **Y la mutación sirvió para algo más que confirmar.** El caso que vigilaba la deduplicación se quedó
 CIEGO al cambiar el diseño: ponía tres escrituras seguidas, y el colapso de repeticiones ya las
