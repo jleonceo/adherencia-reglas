@@ -23,11 +23,11 @@ primera ejecución devuelva algo; después edita `reglas.json` con las tuyas.
 ## Instalación
 
 La skill se instala desde su propio repositorio, que es donde vive el paquete y donde está
-documentado cómo quitarla: **[jleonceo/adherencia-reglas-skill](https://github.com/jleonceo/adherencia-reglas-skill)**.
+documentado cómo quitarla: **[jleonceo/skill-adherencia-reglas](https://github.com/jleonceo/skill-adherencia-reglas)**.
 
 ```bash
-/plugin marketplace add jleonceo/adherencia-reglas-skill
-/plugin install adherencia-reglas@adherencia-reglas-skill
+/plugin marketplace add jleonceo/skill-adherencia-reglas
+/plugin install adherencia-reglas@skill-adherencia-reglas
 ```
 
 Para lo que cuenta este documento no hace falta instalar nada. El instrumento viaja aquí dentro y se
@@ -380,11 +380,11 @@ trozo distinto del mismo problema:
 ## Installation
 
 The skill installs from its own repository, which is where the package lives and where removing it
-is documented: **[jleonceo/adherencia-reglas-skill](https://github.com/jleonceo/adherencia-reglas-skill)**.
+is documented: **[jleonceo/skill-adherencia-reglas](https://github.com/jleonceo/skill-adherencia-reglas)**.
 
 ```bash
-/plugin marketplace add jleonceo/adherencia-reglas-skill
-/plugin install adherencia-reglas@adherencia-reglas-skill
+/plugin marketplace add jleonceo/skill-adherencia-reglas
+/plugin install adherencia-reglas@skill-adherencia-reglas
 ```
 
 Nothing needs installing for what this document reports. The instrument travels inside this
