@@ -8,6 +8,7 @@ description: >
   propio instrumento determinista, sin modelo de lenguaje de por medio. NO juzga si la regla es
   buena ni si el trabajo estuvo bien hecho: cuenta ocasiones y respuestas.
 license: MIT
+allowed-tools: Bash(python ${CLAUDE_SKILL_DIR}/medir_adherencia.py *)
 compatibility: >
   Solo Claude Code. Lee los transcripts JSONL locales de ~/.claude/projects/, cuyo formato la
   documentación de Anthropic declara interno y sujeto a cambios entre versiones. Probada contra
@@ -47,14 +48,22 @@ escrita. Esa lectura es de quien lee.
 ## Cómo se usa
 
 ```
-python ~/.claude/skills/adherencia-reglas/medir_adherencia.py
+python ${CLAUDE_SKILL_DIR}/medir_adherencia.py
 ```
 
 Sin argumentos mide la conversación principal de todos los proyectos. Para acotar a uno:
 
 ```
-python ~/.claude/skills/adherencia-reglas/medir_adherencia.py --sesiones "~/.claude/projects/MI-PROYECTO"
+python ${CLAUDE_SKILL_DIR}/medir_adherencia.py --sesiones "~/.claude/projects/MI-PROYECTO"
 ```
+
+`${CLAUDE_SKILL_DIR}` es el directorio donde vive este `SKILL.md`, y Claude Code lo sustituye antes
+de ejecutar nada. **Aquí ponía la ruta escrita a mano, `~/.claude/skills/adherencia-reglas/`, y esa
+ruta solo existe si la skill se copia a mano:** instalada desde el marketplace de plugins el fichero
+vive en otro sitio y el comando fallaba, o sea que la vía de instalación principal estaba rota.
+Cazado el 27/07/2026 contra la documentación oficial. La sustitución en `allowed-tools` necesita
+Claude Code 2.1.129 o posterior; en versiones anteriores el comando funciona igual y solo pide
+permiso una vez.
 
 El nombre de la carpeta lo pone Claude Code a partir de la ruta de trabajo, así que se mira con
 `ls ~/.claude/projects`.
@@ -175,7 +184,7 @@ cosas, que es justamente lo que aquí se hace.
 
 ## Banco
 
-Son **tres bancos y 154 casos**, todos sobre trazas fabricadas y nunca sobre el historial real: un banco
+Son **tres bancos y 155 casos**, todos sobre trazas fabricadas y nunca sobre el historial real: un banco
 que dependa de los datos de hoy cambia de resultado mañana.
 
 `run_tests_adherencia.py` lleva 54 casos y prueba la lógica.
@@ -195,7 +204,7 @@ nada. **`--acciones` queda fuera de esa promesa a propósito**: enseña rutas de
 eso existe, y sin una ruta de ejemplo nadie puede saber si su vocabulario casa con su trabajo. Que la salida
 sea agregada se puede ver leyendo el código; leerlo no es garantizarlo.
 
-`test_portabilidad.py` lleva 83 casos y prueba otra cosa: que la herramienta sirva fuera de esta máquina.
+`test_portabilidad.py` lleva 84 casos y prueba otra cosa: que la herramienta sirva fuera de esta máquina.
 Rutas POSIX y de Windows, vocabulario de otro proyecto, configuración mal escrita y otra estructura
 de carpetas. Existe porque el primero no cubría nada de eso, y ninguno de esos casos da error: todos
 devuelven números, y los números están mal.

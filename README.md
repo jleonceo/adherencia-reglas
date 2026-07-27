@@ -22,32 +22,21 @@ primera ejecución devuelva algo; después edita `reglas.json` con las tuyas.
 
 ## Instalación
 
-Tres vías. La primera es la corta; la última funciona siempre.
+La skill se instala desde su propio repositorio, que es donde vive el paquete y donde está
+documentado cómo quitarla: **[jleonceo/adherencia-reglas-skill](https://github.com/jleonceo/adherencia-reglas-skill)**.
 
 ```bash
-# 1. Como plugin de Claude Code
-/plugin marketplace add jleonceo/adherencia-reglas
-/plugin install adherencia-reglas@adherencia-reglas
+/plugin marketplace add jleonceo/adherencia-reglas-skill
+/plugin install adherencia-reglas@adherencia-reglas-skill
+```
 
-# 2. Con el instalador de skills
-npx skills add jleonceo/adherencia-reglas
+Para lo que cuenta este documento no hace falta instalar nada. El instrumento viaja aquí dentro y se
+ejecuta tal cual, que es como se reproduce cada cifra de más abajo:
 
-# 3. A mano, que es copiar una carpeta
+```bash
 git clone https://github.com/jleonceo/adherencia-reglas
-cp -r adherencia-reglas/skills/adherencia-reglas ~/.claude/skills/
+python adherencia-reglas/skills/adherencia-reglas/medir_adherencia.py --acciones
 ```
-
-**Para quitarla**, que suele ser lo que nadie escribe:
-
-```bash
-/plugin uninstall adherencia-reglas@adherencia-reglas
-/plugin marketplace remove adherencia-reglas   # ojo: esto desinstala todos sus plugins
-npx skills remove adherencia-reglas
-rm -rf ~/.claude/skills/adherencia-reglas      # si la copiaste a mano
-```
-
-No hay nada que desinstalar aparte de eso: la skill no escribe fuera de su carpeta, no deja
-configuración suelta y no toca tu historial.
 
 
 ### El problema
@@ -304,13 +293,13 @@ aquí hacen falta más días con muestra suficiente.
 
 ### Verificación
 
-154 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
+155 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
 de los datos de hoy cambia de resultado mañana.
 
 ```
 cd skills/adherencia-reglas
 python run_tests_adherencia.py     # 54 casos: la lógica
-python test_portabilidad.py        # 83 casos: la herramienta fuera de su casa
+python test_portabilidad.py        # 84 casos: la herramienta fuera de su casa
 python test_seguridad.py           # 17 casos: que no se lleve nada de tu historial
 python mutar.py                    # 15 sabotajes: comprueba que los bancos sirven
 python cobertura.py                # qué líneas del instrumento no ejecuta ningún caso
@@ -390,32 +379,22 @@ trozo distinto del mismo problema:
 
 ## Installation
 
-Three ways. The first is the short one; the last always works.
+The skill installs from its own repository, which is where the package lives and where removing it
+is documented: **[jleonceo/adherencia-reglas-skill](https://github.com/jleonceo/adherencia-reglas-skill)**.
 
 ```bash
-# 1. As a Claude Code plugin
-/plugin marketplace add jleonceo/adherencia-reglas
-/plugin install adherencia-reglas@adherencia-reglas
+/plugin marketplace add jleonceo/adherencia-reglas-skill
+/plugin install adherencia-reglas@adherencia-reglas-skill
+```
 
-# 2. With the skills installer
-npx skills add jleonceo/adherencia-reglas
+Nothing needs installing for what this document reports. The instrument travels inside this
+repository and runs as it is, which is how every figure below is reproduced:
 
-# 3. By hand, which is copying a folder
+```bash
 git clone https://github.com/jleonceo/adherencia-reglas
-cp -r adherencia-reglas/skills/adherencia-reglas ~/.claude/skills/
+python adherencia-reglas/skills/adherencia-reglas/medir_adherencia.py --acciones
 ```
 
-**To remove it**, which is what almost nobody writes down:
-
-```bash
-/plugin uninstall adherencia-reglas@adherencia-reglas
-/plugin marketplace remove adherencia-reglas   # careful: this uninstalls all its plugins
-npx skills remove adherencia-reglas
-rm -rf ~/.claude/skills/adherencia-reglas      # if you copied it by hand
-```
-
-Nothing else to clean up: the skill writes nothing outside its own folder, leaves no stray
-configuration and never touches your history.
 
 
 ### The problem
@@ -652,13 +631,13 @@ here needs more days with a real sample.
 
 ### Verification
 
-154 cases across three benches, over fabricated traces and never over the real history: a bench that
+155 cases across three benches, over fabricated traces and never over the real history: a bench that
 depends on today's data gives a different answer tomorrow.
 
 ```
 cd skills/adherencia-reglas
 python run_tests_adherencia.py     # 54 cases: the logic
-python test_portabilidad.py        # 83 cases: the tool away from home
+python test_portabilidad.py        # 84 cases: the tool away from home
 python test_seguridad.py           # 17 cases: that it takes nothing from your history
 python mutar.py                    # 15 sabotages: checks the benches are worth anything
 python cobertura.py                # which lines of the tool no case ever runs

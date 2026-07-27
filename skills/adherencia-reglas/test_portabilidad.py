@@ -1205,6 +1205,13 @@ class TestCifrasDeLaPortada(unittest.TestCase):
     # Los pares de cifras que cuentan UN MISMO hecho y aparecen en las dos mitades del README
     # bilingue. Se declaran como patron por idioma para poder compararlos entre si.
     HECHOS_BILINGUES = [
+        # El total del banco es el unico hecho que publican TODOS los README del proyecto: el del
+        # estudio y el del paquete instalable, que no comparten ninguna otra cifra. Sin el, el
+        # README del paquete no tenia ni un hecho comparable entre mitades y este caso salia con
+        # "el buscador esta roto" en vez de comprobar nada (27/07/2026).
+        ("el total del banco",
+         r"(\d+) casos en tres bancos",
+         r"(\d+) cases across three benches"),
         ("la cifra de portada",
          r"en (\d+) de (\d+) ocasiones",
          r"in (\d+) out of (\d+) opportunities"),
@@ -1212,6 +1219,62 @@ class TestCifrasDeLaPortada(unittest.TestCase):
          r"\*\*(\d+) % el d[ií]a\s*\n?en que se cable[oó] su hook\*\*,\s*\n?sobre (\d+) ocasiones",
          r"\*\*(\d+) % on the day its\s*\n?hook was wired\*\*, over (\d+) opportunities"),
     ]
+
+    def _comparar_mitades(self, doc, texto):
+        """Compara los hechos declarados entre la mitad española y la inglesa de UN texto.
+
+        Vive aparte del caso que lo usa para que el caso de control de abajo ejerza ESTA misma
+        funcion sobre texto fabricado, y no una copia suya que puede derivar.
+        """
+        malas, comprobados = [], 0
+        for etiqueta, patron_es, patron_en in self.HECHOS_BILINGUES:
+            es = re.findall(patron_es, texto)
+            en = re.findall(patron_en, texto)
+            # Ausente en LAS DOS mitades no es defecto: este proyecto tiene dos README con
+            # trabajos distintos (el del estudio publica las cifras de campo; el del paquete
+            # instalable, solo las del banco), y exigirle a cada uno los hechos del otro
+            # convertia el caso en "el buscador esta roto" (27/07/2026). Lo que SI es defecto,
+            # y era el defecto original, es publicarlo en una mitad y no en la otra.
+            if not es and not en:
+                continue
+            if not es or not en:
+                malas.append("%s: '%s' aparece %d vez/veces en español y %d en ingles. O el "
+                             "hecho se publica en un solo idioma, o el patron esta roto."
+                             % (doc, etiqueta, len(es), len(en)))
+                continue
+            comprobados += 1
+            if es[0] != en[0]:
+                malas.append("%s: '%s' dice %s en español y %s en ingles"
+                             % (doc, etiqueta, es[0], en[0]))
+        return malas, comprobados
+
+    def test_dejar_pasar_el_hecho_ausente_no_deja_pasar_el_descuadre(self):
+        """Control del cambio que aflojo este guardian el 27/07/2026.
+
+        Al aparecer un segundo README (el del paquete instalable) que no publica las cifras de
+        campo del primero, "hecho ausente" dejo de ser defecto. Aflojar una comprobacion sin un
+        caso que sujete lo que sigue prohibido es como quitarla: estos tres ejercen la funcion de
+        verdad, no una copia, y fijan la frontera exacta.
+        """
+        cabecera = "## Español\n%s\n## English\n%s\n"
+
+        # 1. Ausente en las dos mitades: PASA, y no cuenta como comprobado.
+        malas, comprobados = self._comparar_mitades("fake.md", cabecera % ("nada", "nothing"))
+        self.assertEqual(malas, [], "un hecho que el documento no publica no es un defecto")
+        self.assertEqual(comprobados, 0, "no publicar un hecho no es haberlo comprobado")
+
+        # 2. En una mitad y no en la otra: SIGUE SIENDO DEFECTO.
+        malas, _ = self._comparar_mitades(
+            "fake.md", cabecera % ("154 casos en tres bancos", "nothing here"))
+        self.assertEqual(len(malas), 1, "publicar un hecho en un solo idioma sigue siendo defecto")
+        self.assertIn("en un solo idioma", malas[0])
+
+        # 3. En las dos mitades con cifras distintas: el defecto original, intacto.
+        malas, comprobados = self._comparar_mitades(
+            "fake.md", cabecera % ("154 casos en tres bancos", "152 cases across three benches"))
+        self.assertEqual(comprobados, 1)
+        self.assertEqual(len(malas), 1, "dos mitades con cifras distintas tienen que saltar")
+        self.assertIn("dice 154 en español y 152 en ingles", malas[0])
 
     def test_las_dos_mitades_del_readme_cuentan_LO_MISMO(self):
         """Un README bilingue son dos afirmaciones, y la que nadie mira es la que caduca.
@@ -1234,18 +1297,9 @@ class TestCifrasDeLaPortada(unittest.TestCase):
         for d, texto in docs:
             if "## English" not in texto:
                 continue
-            for etiqueta, patron_es, patron_en in self.HECHOS_BILINGUES:
-                es = re.findall(patron_es, texto)
-                en = re.findall(patron_en, texto)
-                if not es or not en:
-                    malas.append("%s: '%s' aparece %d vez/veces en español y %d en ingles. O el "
-                                 "hecho se publica en un solo idioma, o el patron esta roto."
-                                 % (d, etiqueta, len(es), len(en)))
-                    continue
-                comprobados += 1
-                if es[0] != en[0]:
-                    malas.append("%s: '%s' dice %s en español y %s en ingles"
-                                 % (d, etiqueta, es[0], en[0]))
+            m, c = self._comparar_mitades(d, texto)
+            malas.extend(m)
+            comprobados += c
         if docs:
             self.assertGreater(comprobados, 0,
                                "no se ha podido comparar ni un hecho entre las dos mitades: el "
