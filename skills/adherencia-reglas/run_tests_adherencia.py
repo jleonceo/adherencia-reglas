@@ -665,5 +665,37 @@ class TestLosNueveMenoresDeLaRonda10(Base):
             m.cargar_reglas(self._reglas(hondo))
 
 
+class TestSeparadoresDeLaOrden(unittest.TestCase):
+    """Una orden de shell separa sus argumentos con espacios O con tabuladores.
+
+    Estos dos casos fijan el COMPORTAMIENTO, y conviene saber lo que NO hacen. Se escribieron para
+    vigilar un `cmd.replace("\\t", " ")` que habia justo antes del `split()`, y al intentar
+    ponerlos rojos saboteando esa linea siguieron en verde: `split()` sin argumentos ya parte por
+    cualquier espacio en blanco, asi que aquel `replace` no hacia nada y se quito. Un caso que no
+    sabe ponerse rojo no vigila su objeto, y aqui el objeto no existia.
+
+    Lo que si sostienen es que una orden tabulada se lea igual que una espaciada, que es lo que la
+    herramienta promete al clasificar rutas dentro de un comando.
+    """
+
+    def test_el_tabulador_separa_igual_que_el_espacio(self):
+        con_tab = m.rutas_en_orden("pytest\ttests/unit/test_a.py")
+        con_espacio = m.rutas_en_orden("pytest tests/unit/test_a.py")
+        self.assertEqual(con_tab, ["tests/unit/test_a.py"])
+        self.assertEqual(con_tab, con_espacio,
+                         "una orden separada por tabulador da otro resultado que con espacio")
+
+    def test_varios_tabuladores_seguidos(self):
+        """Tabuladores consecutivos no fabrican tokens vacios ni pegan dos rutas en una."""
+        self.assertEqual(m.rutas_en_orden("pytest\t\tsrc/a.py\tsrc/b.py"),
+                         ["src/a.py", "src/b.py"])
+
+    def test_los_otros_espacios_en_blanco_tambien_separan(self):
+        """Retorno de carro y salto de linea aparecen en ordenes de varias lineas, que es como se
+        escriben en un CI. Si alguien sustituye el `split()` por un `split(" ")`, esto lo caza."""
+        self.assertEqual(m.rutas_en_orden("pytest \\\n  src/a.py\r\n  src/b.py"),
+                         ["src/a.py", "src/b.py"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -102,6 +102,14 @@ MUTACIONES = [
     ("la fecha de sesion solo mira el primer registro y se cae al mtime callando",
      "                if i > 400:            # si en 400 registros no hay fecha, no la hay",
      "                if i > 0:            # si en 400 registros no hay fecha, no la hay"),
+    # 27/07/2026. Nace de un `replace` del tabulador que no hacia nada, porque `split()` sin
+    # argumentos ya parte por cualquier espacio en blanco. Al quitarlo hubo que dejar cableado lo
+    # que de verdad sostiene el comportamiento, que es el `split()` desnudo: partir solo por
+    # espacio pierde las ordenes tabuladas y las escritas en varias lineas, que es como se
+    # escriben en un CI.
+    ("la orden solo se parte por espacio y pierde tabuladores y saltos de linea",
+     "    for token in cmd.split():",
+     '    for token in cmd.split(" "):'),
 ]
 
 

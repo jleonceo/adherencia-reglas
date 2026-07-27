@@ -1202,6 +1202,61 @@ class TestCifrasDeLaPortada(unittest.TestCase):
                          "cifra de sabotajes caducada: %s. `mutar.py` tiene %d."
                          % ("; ".join(malas), cuantas))
 
+    # Numerales escritos con letra, en los dos idiomas del paquete. Llegan hasta treinta porque un
+    # banco de mutacion mas grande que eso ya nadie lo escribe en prosa.
+    _LETRAS = {
+        "once": 11, "doce": 12, "trece": 13, "catorce": 14, "quince": 15, "dieciseis": 16,
+        "dieciséis": 16, "diecisiete": 17, "dieciocho": 18, "diecinueve": 19, "veinte": 20,
+        "veintiuno": 21, "veintidos": 22, "veintidós": 22, "veintitres": 23, "veintitrés": 23,
+        "veinticuatro": 24, "veinticinco": 25, "veintiseis": 26, "veintiséis": 26,
+        "veintisiete": 27, "veintiocho": 28, "veintinueve": 29, "treinta": 30,
+        "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
+        "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19, "twenty": 20,
+    }
+
+    def test_la_cifra_de_sabotajes_TAMBIEN_cuadra_escrita_con_letra(self):
+        """El hueco que dejaba abierto el caso de arriba, cerrado el 27/07/2026.
+
+        Aquel excluia a proposito los numerales en prosa, y la decision tenia sentido cuando la
+        prosa solo repetia lo que ya decia una cifra. Dejo de tenerlo cuando la garantia mas
+        visible del README pasa a estar escrita con letra: "quince de quince, cero huecos". Ahi es
+        donde la lee quien se descarga el paquete, y era justo la forma que nadie miraba. Se
+        descubrio al subir el banco de catorce a quince sabotajes: los digitos saltaron y las
+        cuatro menciones en letra se quedaron mintiendo en verde.
+        """
+        import importlib.util
+        ruta = os.path.join(AQUI, "mutar.py")
+        if not os.path.exists(ruta):
+            self.skipTest("esta instalacion no lleva el banco de mutacion")
+        spec = importlib.util.spec_from_file_location("_conteo_mutar_letra", ruta)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["_conteo_mutar_letra"] = mod
+        spec.loader.exec_module(mod)
+        cuantas = len(mod.MUTACIONES)
+
+        palabras = "|".join(sorted(self._LETRAS, key=len, reverse=True))
+        patron = re.compile(
+            r"\b(%s)\b\s+(?:sabotajes|sabotages)|"
+            r"\b(%s)\b\s+(?:de|out of)\s+\b(%s)\b" % (palabras, palabras, palabras), re.I)
+
+        malas, halladas = [], 0
+        for d, texto in self._docs_a_mirar():
+            for m in patron.finditer(texto):
+                for g in m.groups():
+                    if not g:
+                        continue
+                    halladas += 1
+                    if self._LETRAS[g.lower()] != cuantas:
+                        malas.append("%s dice '%s'" % (d, g))
+        # Control positivo con la misma logica que sus hermanos: si el patron se rompe, esto se
+        # queda en cero y el caso pasaria en verde sin haber mirado nada.
+        self.assertGreater(halladas, 0,
+                           "no se ha leido ni un numeral en letra junto a la cifra de sabotajes: "
+                           "o la documentacion dejo de publicarla asi, o el patron esta roto")
+        self.assertEqual(malas, [],
+                         "cifra de sabotajes caducada, escrita con letra: %s. `mutar.py` tiene %d."
+                         % ("; ".join(malas), cuantas))
+
 
 
 class TestElHistorialTraeLoQueQuiere(Base):

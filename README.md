@@ -298,15 +298,15 @@ cumple mientras se recuerda.
 
 ### Verificación
 
-147 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
+151 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
 de los datos de hoy cambia de resultado mañana.
 
 ```
 cd skills/adherencia-reglas
-python run_tests_adherencia.py     # 49 casos: la lógica
-python test_portabilidad.py        # 81 casos: la herramienta fuera de su casa
+python run_tests_adherencia.py     # 52 casos: la lógica
+python test_portabilidad.py        # 82 casos: la herramienta fuera de su casa
 python test_seguridad.py           # 17 casos: que no se lleve nada de tu historial
-python mutar.py                    # 14 sabotajes: comprueba que los bancos sirven
+python mutar.py                    # 15 sabotajes: comprueba que los bancos sirven
 ```
 
 **El tercero es el que da derecho a fiarse.** Esta herramienta lee tu historial completo, donde hay
@@ -325,9 +325,9 @@ de esos casos da error. Todos devuelven números, y los números están mal.
 
 Verificado por **mutación**, que es lo que separa un banco de un adorno: se sabotea el código a
 propósito y cada sabotaje tiene que ponerlo rojo. **Eso no hay que creérselo: `python mutar.py` lo
-hace delante de ti**, catorce sabotajes contra los tres bancos, y dice cuántos se cazan y cuántos pasan
+hace delante de ti**, quince sabotajes contra los tres bancos, y dice cuántos se cazan y cuántos pasan
 callando. Un sabotaje que nadie caza no es un fallo del código: es una línea que el banco no vigila.
-Hoy son catorce de catorce, cero huecos. Si esa cifra baja al ejecutarlo, el banco ha dejado de cubrir algo
+Hoy son quince de quince, cero huecos. Si esa cifra baja al ejecutarlo, el banco ha dejado de cubrir algo
 y el número que te dé la herramienta vale menos de lo que parece.
 
 El fichero medido se restaura al terminar, y también si el proceso muere a mitad: `mutar.py` deja una
@@ -614,15 +614,15 @@ is still remembered.
 
 ### Verification
 
-147 cases across three benches, over fabricated traces and never over the real history: a bench that
+151 cases across three benches, over fabricated traces and never over the real history: a bench that
 depends on today's data gives a different answer tomorrow.
 
 ```
 cd skills/adherencia-reglas
-python run_tests_adherencia.py     # 49 cases: the logic
-python test_portabilidad.py        # 81 cases: the tool away from home
+python run_tests_adherencia.py     # 52 cases: the logic
+python test_portabilidad.py        # 82 cases: the tool away from home
 python test_seguridad.py           # 17 cases: that it takes nothing from your history
-python mutar.py                    # 14 sabotages: checks the benches are worth anything
+python mutar.py                    # 15 sabotages: checks the benches are worth anything
 ```
 
 `test_portabilidad.py` exists because the first bench tested none of what a new user hits on day one:
@@ -639,9 +639,9 @@ view returns counts and percentages, and there the promise holds in full.
 
 Verified by **mutation**, which is what separates a bench from an ornament: the code is deliberately
 sabotaged and every sabotage must turn it red. **You don't have to take that on trust: `python
-mutar.py` does it in front of you**, fourteen sabotages against the three benches, reporting how many
+mutar.py` does it in front of you**, fifteen sabotages against the three benches, reporting how many
 are caught and how many slip through in silence. A sabotage nobody catches is not a bug in the code:
-it is a line no bench is watching. Today it is fourteen out of fourteen, zero gaps. If that number drops
+it is a line no bench is watching. Today it is fifteen out of fifteen, zero gaps. If that number drops
 when you run it, the bench has stopped covering something.
 
 The measured file is restored on exit, and also if the process is killed mid-run: `mutar.py` keeps an

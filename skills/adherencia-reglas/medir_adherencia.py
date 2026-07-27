@@ -260,7 +260,12 @@ def rutas_en_orden(cmd):
     sale siempre no es una medida.
     """
     fuera = []
-    for token in cmd.replace("	", " ").split():
+    # `split()` SIN argumentos ya parte por cualquier espacio en blanco, tabulador incluido. Aqui
+    # habia antes un `replace` del tabulador por un espacio, escrito ademas con el caracter
+    # literal dentro de la cadena. No hacia nada: se quito el 27/07/2026 al comprobar que el banco
+    # daba el mismo resultado con el `replace` y sin el. Lo que lo destapo fue intentar escribir el
+    # caso que lo vigilase: el sabotaje no se podia cazar porque no habia nada que romper.
+    for token in cmd.split():
         limpio = token.strip("\"'()<>,;")
         if len(limpio) > 300:
             continue
