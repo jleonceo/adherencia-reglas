@@ -58,8 +58,8 @@ python ${CLAUDE_SKILL_DIR}/medir_adherencia.py --sesiones "~/.claude/projects/MI
 ```
 
 `${CLAUDE_SKILL_DIR}` es el directorio donde vive este `SKILL.md`, y Claude Code lo sustituye antes
-de ejecutar nada. **Aquí ponía la ruta escrita a mano, `~/.claude/skills/adherencia-reglas/`, y esa
-ruta solo existe si la skill se copia a mano:** instalada desde el marketplace de plugins el fichero
+de ejecutar nada. **Aquí ponía la ruta escrita a mano, `~/.claude/skills/adherencia-reglas/`.** Esa
+ruta solo existe si la skill se copia a mano: instalada desde el marketplace de plugins el fichero
 vive en otro sitio y el comando fallaba, o sea que la vía de instalación principal estaba rota.
 Cazado el 27/07/2026 contra la documentación oficial. La sustitución en `allowed-tools` necesita
 Claude Code 2.1.129 o posterior; en versiones anteriores el comando funciona igual y solo pide
