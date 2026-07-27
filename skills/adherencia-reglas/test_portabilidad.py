@@ -1202,6 +1202,57 @@ class TestCifrasDeLaPortada(unittest.TestCase):
                          "cifra de sabotajes caducada: %s. `mutar.py` tiene %d."
                          % ("; ".join(malas), cuantas))
 
+    # Los pares de cifras que cuentan UN MISMO hecho y aparecen en las dos mitades del README
+    # bilingue. Se declaran como patron por idioma para poder compararlos entre si.
+    HECHOS_BILINGUES = [
+        ("la cifra de portada",
+         r"en (\d+) de (\d+) ocasiones",
+         r"in (\d+) out of (\d+) opportunities"),
+        ("el dia en que se cableo el hook",
+         r"\*\*(\d+) % el d[ií]a\s*\n?en que se cable[oó] su hook\*\*,\s*\n?sobre (\d+) ocasiones",
+         r"\*\*(\d+) % on the day its\s*\n?hook was wired\*\*, over (\d+) opportunities"),
+    ]
+
+    def test_las_dos_mitades_del_readme_cuentan_LO_MISMO(self):
+        """Un README bilingue son dos afirmaciones, y la que nadie mira es la que caduca.
+
+        POR QUE (27/07/2026). Un lector de fuera comparo las dos mitades y encontro tres numeros
+        para un mismo hecho: el español decia "84 de 110 ocasiones, el 76,4 %" y el ingles "72 out
+        of 90 opportunities", que es el 80 %. Y en la vista por dia, 76 ocasiones contra 89. La
+        version inglesa se habia quedado con la medicion de otro dia al actualizar la española.
+
+        Ningun instrumento de los que ya habia podia verlo: todos abren UN texto y comprueban que
+        sus cifras cuadren con el codigo. Este compara las dos mitades ENTRE SI, que es donde
+        estaba el defecto. En un repositorio cuyo argumento es "no publiques una cifra sin
+        verificarla", esa discrepancia es la peor de las erratas posibles.
+        """
+        docs = [(d, t) for d, t in self._docs_a_mirar()
+                if os.path.basename(d).lower() == "readme.md"]
+        if not docs:
+            self.skipTest("aqui no hay README que comprobar")
+        malas, comprobados = [], 0
+        for d, texto in docs:
+            if "## English" not in texto:
+                continue
+            for etiqueta, patron_es, patron_en in self.HECHOS_BILINGUES:
+                es = re.findall(patron_es, texto)
+                en = re.findall(patron_en, texto)
+                if not es or not en:
+                    malas.append("%s: '%s' aparece %d vez/veces en español y %d en ingles. O el "
+                                 "hecho se publica en un solo idioma, o el patron esta roto."
+                                 % (d, etiqueta, len(es), len(en)))
+                    continue
+                comprobados += 1
+                if es[0] != en[0]:
+                    malas.append("%s: '%s' dice %s en español y %s en ingles"
+                                 % (d, etiqueta, es[0], en[0]))
+        if docs:
+            self.assertGreater(comprobados, 0,
+                               "no se ha podido comparar ni un hecho entre las dos mitades: el "
+                               "buscador esta roto o el README dejo de ser bilingue")
+        self.assertEqual(malas, [], "las dos mitades del README no cuentan lo mismo: %s"
+                         % "; ".join(malas))
+
     # Numerales escritos con letra, en los dos idiomas del paquete. Llegan hasta treinta porque un
     # banco de mutacion mas grande que eso ya nadie lo escribe en prosa.
     _LETRAS = {

@@ -171,7 +171,7 @@ cosas, que es justamente lo que aquí se hace.
 
 ## Banco
 
-Son **tres bancos y 151 casos**, todos sobre trazas fabricadas y nunca sobre el historial real: un banco
+Son **tres bancos y 152 casos**, todos sobre trazas fabricadas y nunca sobre el historial real: un banco
 que dependa de los datos de hoy cambia de resultado mañana.
 
 `run_tests_adherencia.py` lleva 52 casos y prueba la lógica.

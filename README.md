@@ -59,10 +59,13 @@ algo no existe».
 Todas se leen. Ninguna se cuenta.
 
 El caso que originó esto: una regla con hook propio y skill dueña, escrita hacía tres días, se cumplía
-**en 84 de 110 ocasiones, el 76,4 %** (medido el 26/07/2026 con esta misma versión del código). La sospecha existía desde antes. El número no. Sin número no se decide
-nada: ni reforzar la regla, ni retirarla, ni dejarla como está.
+**en 103 de 132 ocasiones, el 78,0 %** (medido el 27/07/2026 con esta misma versión del código, sobre
+un historial privado que tú no tienes: lo que sí puedes reproducir es el ejemplo de más abajo). La
+sospecha existía desde antes. El número no. Sin número no se decide nada: ni reforzar la regla, ni
+retirarla, ni dejarla como está.
 
-Esa cifra empezó el día en 24 % y acabó en 80 %, y ninguna de las versiones intermedias estaba mal
+El día que se midió por primera vez, esa misma regla dio 24 % por la mañana y 80 % por la tarde, y
+ninguna de las versiones intermedias estaba mal
 calculada. Cada una medía un objeto distinto: todos los ficheros o solo los que van dirigidos a
 alguien, desde siempre o desde el alta de la regla, datando las sesiones por la fecha del fichero o
 por la que traen dentro. **Medir una regla obliga a definirla**, y definirla resultó ser el trabajo.
@@ -291,20 +294,21 @@ con la suite en rojo», esto mide otra cosa parecida, y hay que decirlo en voz a
 python skills/adherencia-reglas/medir_adherencia.py --por-dia 7
 ```
 
-Una tasa global promedia días muy distintos. Desglosada, la regla del ejemplo salió al **85 % el día
-en que se cableó su hook**, sobre 76 ocasiones. Los días siguientes la muestra baja a cuatro o seis
-ocasiones y el instrumento las marca como anécdota, así que la caída no se puede leer. Una regla nueva se
-cumple mientras se recuerda.
+Una tasa global promedia días muy distintos. Desglosada, la regla del ejemplo salió al **91 % el día
+en que se cableó su hook**, sobre 76 ocasiones, y al **25 % al día siguiente**, sobre solo 4. Ese 25 %
+no se puede leer como una caída: el instrumento le pone un asterisco justo por eso, porque cuatro
+ocasiones no son una tasa. Una regla nueva se cumple mientras se recuerda, y para saber si eso pasa
+aquí hacen falta más días con muestra suficiente.
 
 ### Verificación
 
-151 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
+152 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
 de los datos de hoy cambia de resultado mañana.
 
 ```
 cd skills/adherencia-reglas
 python run_tests_adherencia.py     # 52 casos: la lógica
-python test_portabilidad.py        # 82 casos: la herramienta fuera de su casa
+python test_portabilidad.py        # 83 casos: la herramienta fuera de su casa
 python test_seguridad.py           # 17 casos: que no se lleve nada de tu historial
 python mutar.py                    # 15 sabotajes: comprueba que los bancos sirven
 ```
@@ -420,8 +424,10 @@ doesn't exist».
 They all get read. None get counted.
 
 The case that started this: a rule with its own hook and its own owning skill, written three days
-earlier, was followed **in 72 out of 90 opportunities**. That figure started the day at 24 % and
-ended at 80 %, and none of the intermediate versions was miscalculated: each measured a different
+earlier, was followed **in 103 out of 132 opportunities, 78.0 %** (measured on 27 July 2026 with this
+same version of the code, over a private history you do not have: what you can reproduce is the
+example below). The day it was first measured, that same rule read 24 % in the morning and 80 % in
+the afternoon, and none of the intermediate versions was miscalculated: each measured a different
 object. Measuring a rule forces you to define it, and defining it turned out to be the work. The suspicion existed. The number didn't,
 and without a number you can't decide anything.
 
@@ -608,19 +614,21 @@ passing one: the tool reads tool calls, not their results.
 python skills/adherencia-reglas/medir_adherencia.py --por-dia 7
 ```
 
-A global rate averages very different days. Broken down, the example rule scored **85 % on the day its
-hook was wired**, over 89 opportunities, and **25 % the day after**. A new rule is followed while it
-is still remembered.
+A global rate averages very different days. Broken down, the example rule scored **91 % on the day its
+hook was wired**, over 76 opportunities, and **25 % the day after**, over just 4. That 25 % cannot be
+read as a drop: the tool flags it with an asterisk for exactly that reason, because four opportunities
+are not a rate. A new rule is followed while it is still remembered, and telling whether that happens
+here needs more days with a real sample.
 
 ### Verification
 
-151 cases across three benches, over fabricated traces and never over the real history: a bench that
+152 cases across three benches, over fabricated traces and never over the real history: a bench that
 depends on today's data gives a different answer tomorrow.
 
 ```
 cd skills/adherencia-reglas
 python run_tests_adherencia.py     # 52 cases: the logic
-python test_portabilidad.py        # 82 cases: the tool away from home
+python test_portabilidad.py        # 83 cases: the tool away from home
 python test_seguridad.py           # 17 cases: that it takes nothing from your history
 python mutar.py                    # 15 sabotages: checks the benches are worth anything
 ```
