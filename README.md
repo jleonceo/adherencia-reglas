@@ -84,7 +84,7 @@ El paquete trae un ejemplo que puedes reproducir ahora mismo, sin tocar tu histo
 
 ```bash
 python ejemplo/fabricar_ejemplo.py
-python skills/adherencia-reglas/medir_adherencia.py --sesiones ejemplo/historial        --reglas ejemplo/reglas_ejemplo.json
+python skills/adherencia-reglas/medir_adherencia.py --sesiones ejemplo/historial --reglas ejemplo/reglas_ejemplo.json
 ```
 
 El primero escribe tres sesiones de juguete con un comportamiento decidido a mano. El segundo las
@@ -311,6 +311,7 @@ python run_tests_adherencia.py     # 52 casos: la lógica
 python test_portabilidad.py        # 83 casos: la herramienta fuera de su casa
 python test_seguridad.py           # 17 casos: que no se lleve nada de tu historial
 python mutar.py                    # 15 sabotajes: comprueba que los bancos sirven
+python cobertura.py                # qué líneas del instrumento no ejecuta ningún caso
 ```
 
 **El tercero es el que da derecho a fiarse.** Esta herramienta lee tu historial completo, donde hay
@@ -631,6 +632,7 @@ python run_tests_adherencia.py     # 52 cases: the logic
 python test_portabilidad.py        # 83 cases: the tool away from home
 python test_seguridad.py           # 17 cases: that it takes nothing from your history
 python mutar.py                    # 15 sabotages: checks the benches are worth anything
+python cobertura.py                # which lines of the tool no case ever runs
 ```
 
 `test_portabilidad.py` exists because the first bench tested none of what a new user hits on day one:

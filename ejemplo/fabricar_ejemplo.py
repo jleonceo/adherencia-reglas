@@ -95,7 +95,8 @@ def sesiones():
         s2 += [escribir_doc(i, 11, i * 3),
                leer_algo(i, 11, i * 3 + 1), leer_algo(i + 10, 11, i * 3 + 2)]
 
-    # s3: codigo tocado cuatro veces y la suite nunca. Cero de cuatro.
+    # s3: codigo tocado cuatro veces y una sola ejecucion de la suite, al final. Solo alcanza a
+    # la ultima escritura dentro de la ventana, asi que sale 1 de 4.
     s3 = []
     for i in range(4):
         s3 += [tocar_codigo(i, 13, i * 4), leer_algo(i, 13, i * 4 + 1)]

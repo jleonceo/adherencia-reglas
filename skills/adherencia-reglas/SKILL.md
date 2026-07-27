@@ -23,8 +23,9 @@ metadata:
 > **Principio rector.** Una regla escrita y no medida es una intención. Este proyecto lleva meses
 > acumulando normas en CLAUDE.md, en skills y en protocolos, y el 25/07/2026 contó por primera vez
 > cuántas se cumplían. La que ordena pasar la puerta de salida antes de publicar un texto, con hook
-> propio y skill dueña, se cumplía en **84 de 110 ocasiones (76,4 %)**, medida con ventana de 6 pasos,
-> ámbito declarado y desde su fecha de alta.
+> propio y skill dueña, se cumplía en **103 de 132 ocasiones (78,0 %)**, medida el 27/07/2026 con ventana de 6 pasos,
+> ámbito declarado y desde su fecha de alta. Sale de un historial privado: lo reproducible es el
+> ejemplo que trae el paquete.
 >
 > Esa cifra empezó el día siendo 24 %, pasó por 26 %, 38 % y 63 %, y acabó en 80 %. **Ninguna de las
 > anteriores estaba mal calculada.** Cada una medía un objeto distinto: todos los ficheros o solo los
@@ -63,7 +64,7 @@ El nombre de la carpeta lo pone Claude Code a partir de la ruta de trabajo, así
 | `--sesiones RUTA` | qué historial se mide. Vale un proyecto o la raíz que los contiene |
 | `--reglas FICHERO` | qué reglas se miden. Por defecto, el `reglas.json` de al lado |
 | `--acciones` | qué acciones aparecen en tu historial y con qué rutas. **Por aquí se empieza** |
-| `--por-dia N` | desglosa los últimos N días |
+| `--por-dia N` | desglosa los últimos N días **con sesiones**, que no son siempre los N del calendario |
 | `--curva-ventana` | cómo cambia la tasa según el plazo de respuesta |
 | `--sensibilidad` | cuánto mueve la cifra **cada** decisión arbitraria, no solo la ventana |
 | `--subagentes` | incluye las sesiones de subagentes, que son otro universo |
@@ -74,8 +75,9 @@ El nombre de la carpeta lo pone Claude Code a partir de la ruta de trabajo, así
 **Las dos vistas que no conviene saltarse.** Una tasa global miente por omisión en dos direcciones.
 `--curva-ventana` enseña que el plazo elegido mueve la cifra casi treinta puntos, del 49,7 % con
 ventana 2 al 83,0 % con ventana 40 sobre los mismos datos. Y `--por-dia` enseña lo que el promedio
-tapa: la puerta de salida se cumplió el **85 %** el 22 de julio, que es el día en que se cableó, y
-cayó al **25 %** al día siguiente. Una regla nueva se cumple mientras se recuerda.
+tapa: la puerta de salida se cumplió el **91 %** el 22 de julio, que es el día en que se cableó,
+sobre 76 ocasiones, y el **25 %** al día siguiente sobre solo 4. Ese 25 % no es una caída medida: el
+instrumento le pone un asterisco justo por eso, porque cuatro ocasiones no son una tasa.
 
 **`--sensibilidad` existe por un hallazgo incómodo.** La opción `--curva-ventana` se escribió porque
 alguien se quejó de ese parámetro en concreto. Una auditoría que miraba el razonamiento de la
@@ -183,7 +185,7 @@ es un fallo del código: es una línea que el banco no vigila. El fichero medido
 y también si matan el proceso a mitad, porque la copia intacta vive en disco y no en el flujo del
 programa; mientras esa copia esté ahí, `test_seguridad.py` se pone rojo.
 
-`test_seguridad.py` lleva 17 y es el que da derecho a fiarse: esta herramienta lee el historial
+`test_seguridad.py` lleva 17 casos y es el que da derecho a fiarse: esta herramienta lee el historial
 completo de sesiones, donde hay nombres, cuentas bancarias, documentos de identidad y claves pegadas
 por descuido. Se plantan canarios de mentira en un historial de juguete y se exige que no salgan por
 las vistas de agregados ni por ningún camino de error, además de la comprobación de que no escribe
@@ -191,7 +193,7 @@ nada. **`--acciones` queda fuera de esa promesa a propósito**: enseña rutas de
 eso existe, y sin una ruta de ejemplo nadie puede saber si su vocabulario casa con su trabajo. Que la salida
 sea agregada se puede ver leyendo el código; leerlo no es garantizarlo.
 
-`test_portabilidad.py` lleva 80 y prueba otra cosa: que la herramienta sirva fuera de esta máquina.
+`test_portabilidad.py` lleva 83 casos y prueba otra cosa: que la herramienta sirva fuera de esta máquina.
 Rutas POSIX y de Windows, vocabulario de otro proyecto, configuración mal escrita y otra estructura
 de carpetas. Existe porque el primero no cubría nada de eso, y ninguno de esos casos da error: todos
 devuelven números, y los números están mal.

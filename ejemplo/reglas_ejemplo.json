@@ -34,7 +34,7 @@
       "ventana": 3,
       "desde": "2026-07-01",
       "umbral": null,
-      "nota": "La sesion de juguete toca codigo cuatro veces y ejecuta la suite UNA, muy lejos. Sale cero, y ese cero ensena lo que hace la ventana: con ventana 40 saldria distinto sobre los mismos datos. Por eso `--curva-ventana` no es opcional antes de publicar un numero."
+      "nota": "La sesion de juguete toca codigo cuatro veces y ejecuta la suite UNA, y esa unica vez llega tarde para tres de las cuatro: sale 1 de 4, el 25 %, con asterisco de muestra corta. Con ventana 40 sobre los mismos datos saldria distinto, y por eso `--curva-ventana` no es opcional antes de publicar un numero."
     }
   ]
 }

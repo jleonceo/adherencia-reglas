@@ -8,8 +8,8 @@ name: ci
 # parte por contrabarra y la clasificacion se hundia sin dar error.
 #
 # Aviso honesto (26/07/2026): esta matriz NUNCA SE HA EJECUTADO. En local solo se ha probado con
-# Python 3.14 en Windows, y el README anuncia 3.8+. Un escaneo estatico no encontro sintaxis ni
-# biblioteca por encima de 3.8, pero eso encuentra incompatibilidades, no certifica compatibilidad.
+# Python 3.14 y 3.13 en Windows, y el README anuncia 3.9+. Un escaneo estatico no encontro sintaxis
+# ni biblioteca por encima de 3.9, pero eso encuentra incompatibilidades, no certifica compatibilidad.
 # Lo que la certifica es este fichero dando verde, y hasta el primer push no lo ha dado.
 
 on:
