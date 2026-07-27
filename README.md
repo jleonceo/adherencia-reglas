@@ -175,8 +175,8 @@ dónde sale cada una porque no todas valen lo mismo fuera de aquí:
 | 6 | `leer-doc`, `leer-codigo`, `escribir-doc`, `escribir-codigo`, `buscar`, `subagente` | del tipo de llamada y de la extensión | sí |
 | 3 | `escribir-doctrina`, `leer-skill`, `leer-rag` | de que la ruta pase por `skills/` o `rag/` | **solo si tienes esas carpetas** |
 
-Las tres últimas son una convención, no un estándar, y estaban cableadas en el código: en un
-proyecto sin esas carpetas medían cero para siempre y sin decirlo. Ahora se declaran. Si no las
+Las tres últimas son una convención de esta casa en vez de un estándar, y estaban cableadas en el
+código: en un proyecto sin esas carpetas medían cero para siempre y sin decirlo. Ahora se declaran. Si no las
 declaras, esos ficheros cuentan como documento o como código, que es lo que son:
 
 ```json
@@ -239,7 +239,7 @@ Esta herramienta hace justo lo que ahí se desaconseja, y conviene saberlo antes
 números:
 
 - **Probada contra Claude Code 2.x**, en julio de 2026. Si el formato cambia, lo que verás es un
-  recuento que baja sin motivo, no un error: por eso el banco fabrica sus propias trazas y no
+  recuento que baja sin motivo en vez de un error: por eso el banco fabrica sus propias trazas y no
   depende de tu historial.
 - **Tus transcripts se borran a los 30 días** por defecto (`cleanupPeriodDays`). Cualquier medición
   «desde siempre» tiene ese suelo, y una regla dada de alta hace tres meses no se puede medir desde
@@ -282,7 +282,7 @@ principio de la siguiente, eso cuenta como incumplido. Con sesiones que se corta
 va hacia abajo.
 
 **Mide que ejecutaste el comando, no que saliera bien.** Un `pytest` en rojo cuenta igual que uno en
-verde: la herramienta lee las llamadas a herramienta, no sus resultados. Si tu regla dice «no cierro
+verde: la herramienta lee las llamadas a herramienta y nunca sus resultados. Si tu regla dice «no cierro
 con la suite en rojo», esto mide otra cosa parecida, y hay que decirlo en voz alta.
 
 ### La vista que más enseña
@@ -354,7 +354,7 @@ identificador de bloque.
 
 ### Requisitos
 
-Python 3.9 o superior. Biblioteca estándar, nada más. La versión mínima es la que el CI certifica, no la que el código parece admitir.
+Python 3.9 o superior. Biblioteca estándar, nada más. La versión mínima es la que el CI certifica, en vez de la que el código parece admitir.
 
 ### Verificado en
 
