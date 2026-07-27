@@ -1296,6 +1296,48 @@ class TestValoresExtremos(Base):
         M._valida_tipos(self._regla(ventana=6, umbral=50))
 
 
+class TestHistorialDeWindowsMedidoEnPosix(Base):
+    """El cruce que nadie prueba y es el que rompe: historial escrito en Windows, medido en Linux.
+
+    Las rutas del historial vienen con contrabarra porque las escribio otra maquina, y el sistema
+    donde se mide no la considera separador. Esta herramienta no depende de `os.path` para
+    clasificar (normaliza a barra por su cuenta antes de mirar nada), y eso es justo lo que hay
+    que demostrar en vez de suponerlo: aqui se sustituye la funcion del sistema por la de POSIX
+    durante la medicion, que es como se comporta un runner de Linux.
+
+    El banco hermano de `compact-retention` tenia este caso y este no. La asimetria no era una
+    decision: era un hueco.
+    """
+
+    def _medir(self):
+        regs = []
+        for i in range(3):
+            regs.append(tool("Write", {"file_path": r"C:\Users\ana\proyecto\docs\guia_%d.md" % i},
+                             "w%d" % i))
+            regs.append(tool("Bash", {"command": "npx prettier --check docs/"}, "b%d" % i))
+        p = self.sesion("s.jsonl", regs)
+        reglas = [{"id": "formato-docs", "disparador": "escribir-doc", "respuesta": "formato",
+                   "ventana": 3, "ambito": ["/docs/"]}]
+        rx, acc = M.compilar_acciones_shell([["formato", r"prettier"]])
+        return M.medir([p], reglas, rx_shell=rx, acciones=acc)[0]
+
+    def test_las_cifras_no_cambian_bajo_semantica_posix(self):
+        import posixpath
+        antes = self._medir()
+        original = os.path.basename
+        try:
+            os.path.basename = posixpath.basename
+            despues = self._medir()
+        finally:
+            os.path.basename = original
+        self.assertEqual(antes["disparadores"], 3,
+                         "el caso no vale si ya fallaba con la semantica nativa")
+        self.assertEqual(despues["disparadores"], antes["disparadores"],
+                         "un historial de Windows medido en POSIX pierde disparadores")
+        self.assertEqual(despues["cumplidos"], antes["cumplidos"],
+                         "un historial de Windows medido en POSIX pierde cumplimientos")
+
+
 if __name__ == "__main__":
     r = unittest.TextTestRunner(verbosity=2).run(
         unittest.defaultTestLoader.loadTestsFromModule(sys.modules["__main__"]))

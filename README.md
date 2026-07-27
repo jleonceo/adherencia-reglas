@@ -298,13 +298,13 @@ cumple mientras se recuerda.
 
 ### Verificación
 
-146 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
+147 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
 de los datos de hoy cambia de resultado mañana.
 
 ```
 cd skills/adherencia-reglas
 python run_tests_adherencia.py     # 49 casos: la lógica
-python test_portabilidad.py        # 80 casos: la herramienta fuera de su casa
+python test_portabilidad.py        # 81 casos: la herramienta fuera de su casa
 python test_seguridad.py           # 17 casos: que no se lleve nada de tu historial
 python mutar.py                    # 14 sabotajes: comprueba que los bancos sirven
 ```
@@ -614,13 +614,13 @@ is still remembered.
 
 ### Verification
 
-146 cases across three benches, over fabricated traces and never over the real history: a bench that
+147 cases across three benches, over fabricated traces and never over the real history: a bench that
 depends on today's data gives a different answer tomorrow.
 
 ```
 cd skills/adherencia-reglas
 python run_tests_adherencia.py     # 49 cases: the logic
-python test_portabilidad.py        # 80 cases: the tool away from home
+python test_portabilidad.py        # 81 cases: the tool away from home
 python test_seguridad.py           # 17 cases: that it takes nothing from your history
 python mutar.py                    # 14 sabotages: checks the benches are worth anything
 ```
