@@ -48,9 +48,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      # UN REINTENTO, Y NO ES COMODIDAD. Subir el arreglo a los dos repositorios son dos push
+      # seguidos, y entre uno y otro los arboles difieren de verdad: el 27/07 la primera pasada
+      # salio roja por los CUATRO SEGUNDOS que tardo en llegar el hermano, y eso manda un correo
+      # de fallo por cada pareja de push legitima. Un guardian que grita sin motivo se acaba
+      # ignorando, que es como muere uno que si tenia razon. Espera y vuelve a mirar UNA vez; si
+      # a los noventa segundos siguen separados, entonces el rojo es real.
       - name: Los dos gemelos siguen coincidiendo
         working-directory: .
-        run: python test_gemelo.py
+        run: |
+          python test_gemelo.py && exit 0
+          echo "Separados. Puede ser la ventana entre los dos push: espero 90 s y vuelvo a mirar."
+          sleep 90
+          python test_gemelo.py
   test:
     runs-on: ${{ matrix.os }}
     strategy:

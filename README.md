@@ -20,26 +20,6 @@ primera ejecución devuelva algo; después edita `reglas.json` con las tuyas.
 
 ## Español
 
-## Instalación
-
-La skill se instala desde su propio repositorio, que es donde vive el paquete y donde está
-documentado cómo quitarla: **[jleonceo/skill-adherencia-reglas](https://github.com/jleonceo/skill-adherencia-reglas)**.
-
-```bash
-/plugin marketplace add jleonceo/skill-adherencia-reglas
-/plugin install adherencia-reglas@skill-adherencia-reglas
-```
-
-Para lo que cuenta este documento no hace falta instalar nada. El instrumento viaja aquí dentro y se
-ejecuta tal cual, que es como se reproduce cada cifra de más abajo:
-
-```bash
-git clone https://github.com/jleonceo/adherencia-reglas
-cd adherencia-reglas
-python skills/adherencia-reglas/medir_adherencia.py --acciones
-```
-
-
 ### El problema
 
 Un proyecto que trabaja con agentes acumula reglas. En `CLAUDE.md`, en skills, en protocolos. «Pasa el
@@ -102,6 +82,13 @@ Si una regla saliera con `n/d`, eso no es un cero: es que en ese historial no hu
 así que la regla no llegó a poder cumplirse. Confundir las dos cosas es el error que esta
 herramienta persigue.
 
+### Instalación
+
+Para leer este documento no hace falta instalar nada: el instrumento viaja dentro y los dos comandos
+de arriba lo ejecutan tal cual. Para usarlo a diario en Claude Code, el paquete y sus instrucciones
+de desinstalación viven en
+**[jleonceo/skill-adherencia-reglas](https://github.com/jleonceo/skill-adherencia-reglas)**.
+
 ### Para qué sirve el número
 
 **Alta y baja se leen contra sí mismas, no contra el 100 %.** Una tasa suelta no dice nada: hay
@@ -159,51 +146,22 @@ herramienta trae `--curva-ventana` para que puedas enseñarla junto al número.
 ### Lo primero que tienes que cambiar: las acciones
 
 Una regla se declara como «tras el disparador X debe venir la respuesta Y», y X e Y salen de un mapa
-que traduce llamadas a herramienta en verbos. De fábrica vienen **quince**, aunque con el
-`reglas.json` que trae el paquete solo doce están activas: las tres que dependen de tus carpetas
-de doctrina llegan con las listas vacías, y el propio fichero explica por qué. Conviene saber de
-dónde sale cada una porque no todas valen lo mismo fuera de aquí:
+que traduce llamadas a herramienta en verbos. De fábrica vienen quince, doce activas. Seis salen del
+comando que ejecutas, seis del tipo de llamada y de la extensión del fichero, y las tres últimas
+dependen de que tengas carpetas de doctrina, así que llegan con las listas vacías.
 
-| Cuántas | Cuáles | De dónde salen | ¿Valen en tu proyecto? |
-|---|---|---|---|
-| 6 | `git-commit`, `git-add`, `git-push`, `git-mirar`, `test`, `shell` | del comando que ejecutas | sí, son universales |
-| 6 | `leer-doc`, `leer-codigo`, `escribir-doc`, `escribir-codigo`, `buscar`, `subagente` | del tipo de llamada y de la extensión | sí |
-| 3 | `escribir-doctrina`, `leer-skill`, `leer-rag` | de que la ruta pase por `skills/` o `rag/` | **solo si tienes esas carpetas** |
-
-Las tres últimas son una convención de esta casa en vez de un estándar, y estaban cableadas en el
-código: en un proyecto sin esas carpetas medían cero para siempre y sin decirlo. Ahora se declaran. Si no las
-declaras, esos ficheros cuentan como documento o como código, que es lo que son:
-
-```json
-{"carpetas_doctrina": {"skill": ["/politicas/"], "rag": ["/base_conocimiento/"]}}
-```
-
-Con las listas vacías la distinción desaparece por completo, que es lo correcto cuando no existe.
-
-Es la segunda vez que pasa lo mismo. La versión anterior traía además cinco acciones con los nombres
-de los **scripts** del proyecto donde nació esto, y se sacaron a configuración; faltaba sacar las que
-llevaban el nombre de sus **carpetas**. Un cero se lee como incumplimiento y no como «esto no
-aplica», que es justo lo que esta herramienta viene a evitar.
-
-Tu linter, tu desplegador o tu generador se llaman como se llamen en tu casa. Empieza por ver qué
-hay en tu historial:
+**Tu linter y tu desplegador no se llaman como los míos.** Empieza por mirar qué reconoce en tu casa:
 
 ```
 python skills/adherencia-reglas/medir_adherencia.py --acciones --sesiones "~/.claude/projects/MI-PROYECTO"
 ```
 
-Sin `--sesiones` lee **todo** tu historial de Claude Code, de todos los proyectos a la vez. A
-veces es lo que quieres; casi nunca es lo que esperas la primera vez.
-
-Y declara las que falten en el mismo `reglas.json`:
+Después declara lo que falte en `reglas.json`. El fichero lleva dentro la referencia completa de
+cada campo, con el porqué de cada uno; aquí solo va la forma:
 
 ```json
 {
-  "acciones_shell": [
-    ["lint",   "eslint|prettier"],
-    ["suite",  "pytest|npm test|go test"],
-    ["deploy", "flyctl deploy|vercel --prod"]
-  ],
+  "acciones_shell": [["deploy", "flyctl deploy|vercel --prod"]],
   "reglas": [
     {"id": "lint-antes-de-desplegar", "disparador": "deploy", "respuesta": "lint",
      "ventana": 8, "direccion": "antes", "desde": "2026-01-15"}
@@ -211,74 +169,47 @@ Y declara las que falten en el mismo `reglas.json`:
 }
 ```
 
-El patrón es una expresión regular que se busca en la línea de comandos.
+Dos detalles que cuestan una tarde si nadie los dice. Declarar un nombre que ya existe lo **amplía**,
+no lo sustituye: el tuyo se prueba primero y el de fábrica sigue detrás. Y un patrón inválido detiene
+la herramienta en vez de medir cero, porque una acción rota que mide cero en silencio es el fallo
+exacto que esto viene a evitar.
 
-**Declarar un nombre que ya existe lo AMPLÍA, no lo sustituye.** El tuyo se prueba primero, pero el
-de fábrica sigue detrás: si declaras `["test", "mi_runner"]`, tu runner cuenta como `test` y `pytest`
-y `npm test` siguen contando también. Es lo que hace falta casi siempre, y por eso es así, pero no es
-lo que la palabra «redefinir» sugiere. La herramienta lo avisa por pantalla cuando ocurre, para que
-no lo descubras leyendo una tasa que no cuadra.
+*Este bloque tenía sesenta y cinco líneas y repetía la referencia que ya está en `reglas.json` y en
+`SKILL.md`. Tres copias del mismo hecho es como se separan las cifras, que es de lo que trata el
+repositorio.*
 
-Si escribes un patrón inválido, la herramienta se queja y para: una acción rota que midiese cero en
-silencio es exactamente el fallo que esto viene a evitar.
+### Lo que este número no dice
 
-### Lo que puede romper esto
+Tres secciones seguidas explicaban por qué no fiarse de la cifra, y eran un 16 % del documento. La
+honestidad no está en la cantidad de párrafos. Van aquí las cinco cosas que de verdad cambian lo que
+puedes concluir.
 
-La documentación de Claude Code dice, sobre los ficheros que esta herramienta lee, que **el formato
-de cada entrada es interno y cambia entre versiones, de modo que un programa que los lea
-directamente puede dejar de funcionar en cualquier actualización**. Está en
-[code.claude.com/docs/en/sessions](https://code.claude.com/docs/en/sessions), y recomienda usar
-`/export` o las interfaces de script en su lugar.
+**No hay línea base de azar, y es el límite más serio.** Un 60 % no dice nada por sí solo si la
+respuesta que buscas aparece cada pocas acciones de todos modos. Si commiteas por costumbre cada ocho
+pasos, la regla «commitea tras tocar código» dará un 40 % aunque nunca hayas pensado en ella. Lo
+interpretable son las comparaciones: la misma regla antes y después de ponerle un hook, un día contra
+otro, una regla contra otra del mismo historial. Es un termómetro comparativo.
 
-Esta herramienta hace justo lo que ahí se desaconseja, y conviene saberlo antes de apoyarse en sus
-números:
-
-- **Probada contra Claude Code 2.x**, en julio de 2026. Si el formato cambia, lo que verás es un
-  recuento que baja sin motivo en vez de un error: por eso el banco fabrica sus propias trazas y no
-  depende de tu historial.
-- **Tus transcripts se borran a los 30 días** por defecto (`cleanupPeriodDays`). Cualquier medición
-  «desde siempre» tiene ese suelo, y una regla dada de alta hace tres meses no se puede medir desde
-  su alta.
-- `CLAUDE_CONFIG_DIR` mueve la carpeta entera fuera de `~/.claude`, y
-  `CLAUDE_CODE_SKIP_PROMPT_HISTORY` deja de escribirlos.
-- El transcript se escribe de forma asíncrona, así que los últimos segundos de una sesión viva
-  pueden no estar todavía en disco.
-
-### Lo que NO es
-
-**No es una tasa de incumplimiento.** Una regla puede no aplicar a todos sus disparadores. Mide
-hábito: con qué frecuencia la acción sigue a su disparador sin que nadie lo recuerde.
-
-**No juzga si la regla es buena.** Un 20 % puede ser una regla ignorada o una regla mal escrita.
-
-**No sirve para reglas cuyo disparador es una intención.** «Busca antes de afirmar que algo no
-existe» no deja rastro de herramienta hasta que ya se ha afirmado. Esa familia necesita un hook que la
-cace en el momento.
-
-### Lo que esta herramienta no ve
-
-Cuatro límites que conviene saber antes de fiarse de un número. Ninguno se arregla leyendo mejor la
-tabla, así que van aquí y no en una nota al pie.
-
-**No hay línea base de azar, y es el más serio.** Un 60 % no dice nada por sí solo si la respuesta
-que buscas aparece cada pocas acciones de todos modos. Si commiteas por costumbre cada ocho pasos, la
-regla «commitea tras tocar código» dará un 40 % aunque nunca hayas pensado en ella. Lo que sí es
-interpretable son las **comparaciones**: la misma regla antes y después de ponerle un hook, un día
-contra otro, una regla contra otra del mismo historial. Trátalo como un termómetro comparativo, no
-como una medida absoluta.
-
-**Una sola respuesta paga varias obligaciones.** Tres ficheros de código escritos seguidos y un solo
-`pytest` al final cuentan como tres cumplimientos, no como uno. Esto infla la tasa. En dirección
-«antes» es más marcado: un linter ejecutado una vez cubre todos los despliegues que quepan en la
-ventana.
-
-**La ventana no cruza sesiones.** Si escribes código al final de una sesión y ejecutas los tests al
-principio de la siguiente, eso cuenta como incumplido. Con sesiones que se cortan solas, este sesgo
-va hacia abajo.
+**Una sola respuesta paga varias obligaciones.** Tres ficheros escritos seguidos y un solo `pytest` al
+final cuentan como tres cumplimientos. Esto infla la tasa, y en dirección «antes» más todavía: un
+linter ejecutado una vez cubre todos los despliegues que quepan en la ventana.
 
 **Mide que ejecutaste el comando, no que saliera bien.** Un `pytest` en rojo cuenta igual que uno en
-verde: la herramienta lee las llamadas a herramienta y nunca sus resultados. Si tu regla dice «no cierro
-con la suite en rojo», esto mide otra cosa parecida, y hay que decirlo en voz alta.
+verde. Si tu regla dice «no cierro con la suite en rojo», esto mide otra cosa parecida.
+
+**No es una tasa de incumplimiento y no juzga la regla.** Una norma puede no aplicar a todos sus
+disparadores. Un 20 % puede ser una regla ignorada o una regla mal escrita. Esa lectura es tuya. Y
+para las reglas cuyo disparador es una intención, como «busca antes de afirmar que algo no existe»,
+no hay rastro que contar hasta que ya se ha afirmado: esa familia necesita un hook.
+
+**El formato que lee puede cambiar sin avisar.** La documentación de Claude Code dice que el de estos
+ficheros es interno y cambia entre versiones, y recomienda `/export` en su lugar
+([code.claude.com/docs/en/sessions](https://code.claude.com/docs/en/sessions)). Esta herramienta hace
+lo que ahí se desaconseja. Probada contra Claude Code 2.x en julio de 2026; si el formato cambia
+verás un recuento que baja sin motivo, no un error, y por eso el banco fabrica sus propias trazas.
+Además tus transcripts se borran a los 30 días por defecto, así que cualquier medición «desde
+siempre» tiene ese suelo. La ventana tampoco cruza sesiones: código al final de una y tests al
+principio de la siguiente cuenta como incumplido.
 
 ### La vista que más enseña
 
@@ -351,7 +282,7 @@ identificador de bloque.
 
 ### Requisitos
 
-Python 3.9 o superior. Biblioteca estándar, nada más. **Ese 3.9 está certificado** desde el 27/07/2026: nueve trabajos en verde, con 3.9, 3.11 y 3.13 sobre Windows, Linux y Mac. Hasta esa mañana aquí ponía «declarado, no certificado», y era cierto. Dejó de serlo con el primer push y siguió publicado unas horas, que es lo que pasa cuando un documento narra su propio estado: una nota de humildad caduca igual que una cifra, y esta caducó en la dirección que hace parecer el repositorio peor de lo que es.
+Python 3.9 o superior. Biblioteca estándar, nada más. **Ese 3.9 está certificado** desde el 27/07/2026: nueve trabajos en verde, con 3.9, 3.11 y 3.13 sobre Windows, Linux y Mac. Hasta esa mañana aquí ponía «declarado, no certificado». Era cierto al escribirlo y dejó de serlo con el primer push, pero siguió publicado unas horas. Una nota de humildad caduca igual que una cifra. Esta caducó hacia el lado que hace parecer el repositorio peor de lo que es.
 
 ### Verificado en
 
@@ -362,42 +293,18 @@ saberlo antes de fiarse de una cifra.**
 
 ### Piezas hermanas
 
-Este instrumento sale de un ecosistema de agentes con más partes públicas, y cada una cuenta un
-trozo distinto del mismo problema:
-
-- [claude-code-context-management](https://github.com/jleonceo/claude-code-context-management): qué
-  ficheros de contexto merecen existir y cuáles hacen daño.
-- [guardianes-verificados-ia](https://github.com/jleonceo/guardianes-verificados-ia): cuando una
-  regla no se cumple sola, se le pone mecanismo. Esto mide; aquello obliga.
-- [gobernanza-agentes-verificada](https://github.com/jleonceo/gobernanza-agentes-verificada): cómo
-  se comprueba que un sistema de agentes hace lo que dice.
-- [agent-memory-governance](https://github.com/jleonceo/agent-memory-governance): qué recuerda un
-  agente entre sesiones y qué conviene que olvide.
+[guardianes-verificados-ia](https://github.com/jleonceo/guardianes-verificados-ia) es el paso
+siguiente al de aquí: esto mide, aquello obliga. El resto del ecosistema está en el perfil.
 
 ---
 
 ## English
 
-## Installation
-
-The skill installs from its own repository, which is where the package lives and where removing it
-is documented: **[jleonceo/skill-adherencia-reglas](https://github.com/jleonceo/skill-adherencia-reglas)**.
-
-```bash
-/plugin marketplace add jleonceo/skill-adherencia-reglas
-/plugin install adherencia-reglas@skill-adherencia-reglas
-```
-
-Nothing needs installing for what this document reports. The instrument travels inside this
-repository and runs as it is, which is how every figure below is reproduced:
-
-```bash
-git clone https://github.com/jleonceo/adherencia-reglas
-cd adherencia-reglas
-python skills/adherencia-reglas/medir_adherencia.py --acciones
-```
-
-
+> **Read this first: the tool speaks Spanish, this page does not change that.** Nine of its eleven
+> flags, all eleven configuration keys, the literal values `antes` and `despues`, the fifteen action
+> verbs and every line it prints are in Spanish. Nothing here is translatable by renaming: a rule
+> written with English keys is rejected, loudly and in Spanish. This page is the reference for that
+> vocabulary, not a localised version of the program. The glossary sits at the end.
 
 ### The problem
 
@@ -505,48 +412,22 @@ and measured backwards they collapse: one read 7.7 % stated wrongly and 36.4 % s
 ### Change the actions first
 
 A rule reads «after trigger X, response Y must follow», and X and Y come from a map that turns tool
-calls into verbs. **Fifteen** actions ship by default. They are not all worth the same outside this
-project:
+calls into verbs. Fifteen ship by default, twelve of them active. Six come from the command you run,
+six from the call type and the file extension, and the last three depend on you having doctrine
+folders, so they ship with empty lists.
 
-| How many | Which | Where they come from | Valid in your project? |
-|---|---|---|---|
-| 6 | `git-commit`, `git-add`, `git-push`, `git-mirar`, `test`, `shell` | the command you run | yes, universal |
-| 6 | `leer-doc`, `leer-codigo`, `escribir-doc`, `escribir-codigo`, `buscar`, `subagente` | the call type and the file extension | yes |
-| 3 | `escribir-doctrina`, `leer-skill`, `leer-rag` | the path going through `skills/` or `rag/` | **only if you have those folders** |
-
-Those last three are a convention, not a standard, and they were hardcoded: in a project without
-those folders they measured zero forever and said nothing. Now you declare them, and if you don't,
-those files count as document or code, which is what they are:
-
-```json
-{"carpetas_doctrina": {"skill": ["/policies/"], "rag": ["/knowledge_base/"]}}
-```
-
-Empty lists remove the distinction entirely, which is the right answer when it doesn't exist.
-
-This is the second time around. An earlier version also shipped five actions named after the
-project's **scripts**, which moved to configuration; the ones named after its **folders** were still
-inside.
-
-Start by seeing what your own history contains:
+**Your linter and your deployer are not named like mine.** Start by seeing what it recognises:
 
 ```
 python skills/adherencia-reglas/medir_adherencia.py --acciones --sesiones "~/.claude/projects/MY-PROJECT"
 ```
 
-Without `--sesiones` it reads **your whole history**, every project at once, which is rarely what you
-want on a first look. And note this view prints sample file paths from your history, by design: it is
-the one place where you can see whether your vocabulary matches your actual work.
-
-Then declare whatever is missing in the same `reglas.json`:
+Then declare what is missing in `reglas.json`. That file carries the full field reference with the
+reasoning behind each one; only the shape goes here. **Keys and values stay Spanish:**
 
 ```json
 {
-  "acciones_shell": [
-    ["lint",   "eslint|prettier"],
-    ["suite",  "pytest|npm test|go test"],
-    ["deploy", "kubectl apply|terraform apply|fly deploy"]
-  ],
+  "acciones_shell": [["deploy", "flyctl deploy|vercel --prod"]],
   "reglas": [
     {"id": "lint-before-deploy", "disparador": "deploy", "respuesta": "lint",
      "ventana": 8, "direccion": "antes", "desde": "2026-01-15"}
@@ -554,70 +435,43 @@ Then declare whatever is missing in the same `reglas.json`:
 }
 ```
 
-All three actions have to be declared. The earlier version of this example used `deploy` in the rule
-without declaring it, and the tool refused to run: *unknown action 'deploy'*. That refusal is the
-point. An action nobody declared would otherwise sit at zero forever and read like a rule nobody
-follows.
+Two details that cost an afternoon if nobody says them. Declaring a name that already exists
+**widens** it rather than replacing it: yours is tried first and the factory one stays behind. And an
+invalid pattern stops the tool instead of measuring zero, because a broken action silently measuring
+zero is the exact failure this exists to prevent.
 
-The pattern is a regular expression matched against the command line.
+### What this number does not say
 
-**Declaring a name that already exists EXTENDS it, it does not replace it.** Yours is tried first,
-but the built-in one stays behind it: declare `["test", "my_runner"]` and your runner counts as
-`test` while `pytest` and `npm test` keep counting too. That is what you almost always want, which
-is why it works this way, but it is not what the word "redefine" suggests. The tool now says so on
-screen when it happens, so you don't discover it by reading a rate that makes no sense.
+Three consecutive sections used to explain why not to trust the figure, a sixth of the document.
+Honesty is not a matter of paragraph count. Here are the five things that actually change what you
+can conclude.
 
-An invalid pattern makes the tool complain and stop: an action silently stuck at zero is the exact
-failure this is meant to prevent.
+**There is no chance baseline. That is the most serious limit.** A 60 % says nothing on its own
+if the response you look for shows up every few actions anyway. If you commit out of habit every
+eight steps, «commit after touching code» will read 40 % even if you never thought about it. What is
+interpretable are comparisons: the same rule before and after wiring a hook, one day against
+another, one rule against another in the same history. It is a comparative thermometer.
 
-### What can break this
+**One response pays several obligations.** Three files written in a row and a single `pytest` at the
+end count as three compliances. That inflates the rate, and in the «antes» direction more so: one
+linter run covers every deploy that fits in the window.
 
-The Claude Code documentation states, about the files this tool reads, that **the entry format is
-internal and changes between versions, so scripts that parse them directly can break on any
-release**. It is at [code.claude.com/docs/en/sessions](https://code.claude.com/docs/en/sessions).
-That page recommends `/export` or the script interfaces instead.
+**It measures that you ran the command, not that it passed.** A red `pytest` counts like a green one.
+If your rule says «I never close with a red suite», this measures something adjacent.
 
-This tool does exactly what that paragraph advises against, and you should know before leaning on
-its numbers:
+**It is not a violation rate and it does not judge the rule.** A norm may not apply to all its
+triggers. A 20 % can be an ignored rule or a badly written one. That reading is yours. Rules
+whose trigger is an intention, like «search before claiming something does not exist», leave no trace
+to count until the claim is already made: that family needs a hook.
 
-- **Tested against Claude Code 2.x**, July 2026. If the format changes, what you see is a count
-  dropping for no reason, not an error. That is why the test suite builds its own traces and never
-  reads your real history.
-- **Your transcripts are deleted after 30 days** by default (`cleanupPeriodDays`). Any "since the
-  beginning" measurement has that floor.
-- `CLAUDE_CONFIG_DIR` moves the whole folder out of `~/.claude`, and
-  `CLAUDE_CODE_SKIP_PROMPT_HISTORY` stops them from being written at all.
-- The transcript is written asynchronously, so the last seconds of a live session may not be on
-  disk yet.
-
-### What it is not
-
-**Not a violation rate.** A rule may not apply to every trigger. It measures habit: how often the
-action follows its trigger with nobody there to remind you.
-
-**Not a judgement of the rule.** 20 % can mean an ignored rule or a badly written one.
-
-**Not usable for rules triggered by intent.** «Search before claiming something doesn't exist» leaves
-no tool trace until the claim is already made. That family needs a hook that catches it live.
-
-### What this tool cannot see
-
-Four limits worth knowing before trusting a figure. None of them is fixed by reading the table more
-carefully.
-
-**There is no chance baseline. This is the serious one.** A 60 % means nothing on its own if the
-response you are looking for shows up every few actions anyway. Treat it as a comparative
-thermometer: the same rule before and after wiring a hook, one day against another. Not as an
-absolute measure.
-
-**One response pays for several obligations.** Three code files written in a row and a single
-`pytest` at the end count as three compliances. This inflates the rate.
-
-**The window does not cross sessions.** Code at the end of one session and tests at the start of the
-next count as a miss. This biases downwards.
-
-**It measures that you ran the command, not that it passed.** A failing `pytest` counts the same as a
-passing one: the tool reads tool calls, not their results.
+**The format it reads may change without notice.** Claude Code's documentation states that the format
+of these files is internal and changes between versions, recommending `/export` instead
+([code.claude.com/docs/en/sessions](https://code.claude.com/docs/en/sessions)). This tool does what
+that page advises against. Tested against Claude Code 2.x in July 2026; if the format changes you get
+a count that drops for no reason, not an error, which is why the bench fabricates its own traces.
+Your transcripts are also deleted after 30 days by default, so any «since forever» measurement has
+that floor. The window does not cross sessions either: code at the end of one and tests at the start
+of the next counts as unmet.
 
 ### The most revealing view
 
@@ -683,7 +537,7 @@ numbers come out quietly wrong. This tool deduplicates by block id.
 
 ### Requirements
 
-Python 3.9+. Standard library only. **That 3.9 is certified** as of 27/07/2026: nine green jobs across 3.9, 3.11 and 3.13 on Windows, Linux and Mac. Until that morning this line read «declared, not certified», which was true. It stopped being true on the first push and stayed up for a few hours, which is what happens when a document narrates its own state: a note of humility goes stale like any other figure, and this one went stale in the direction that makes the repository look worse than it is.
+Python 3.9+. Standard library only. **That 3.9 is certified** as of 27/07/2026: nine green jobs across 3.9, 3.11 and 3.13 on Windows, Linux and Mac. Until that morning this line read «declared, not certified». It was true when written and stopped being true on the first push, yet it stayed up for hours. A note of humility goes stale like any other figure. This one went stale towards the side that makes the repository look worse than it is.
 
 ### Tested on
 
@@ -693,11 +547,17 @@ real Mac or Linux history. **That test is missing and you should know it before 
 
 ### Sibling repositories
 
-- [claude-code-context-management](https://github.com/jleonceo/claude-code-context-management):
-  which context files deserve to exist, and which ones do harm.
-- [guardianes-verificados-ia](https://github.com/jleonceo/guardianes-verificados-ia): when a rule
-  won't hold on its own, give it a mechanism. This measures; that one enforces.
-- [gobernanza-agentes-verificada](https://github.com/jleonceo/gobernanza-agentes-verificada): how
-  to check that an agent system does what it claims.
-- [agent-memory-governance](https://github.com/jleonceo/agent-memory-governance): what an agent
-  should remember between sessions, and what it should forget.
+[guardianes-verificados-ia](https://github.com/jleonceo/guardianes-verificados-ia) is the next step
+after this one: this measures, that enforces. The rest of the ecosystem is on the profile.
+
+### Glossary: the fifteen action verbs
+
+`git-commit` commit · `git-add` stage · `git-push` push · `git-mirar` inspect (status, log, diff) ·
+`test` run a suite · `shell` any other command · `leer-doc` read a document · `leer-codigo` read code ·
+`escribir-doc` write a document · `escribir-codigo` write code · `buscar` search · `subagente` spawn a
+subagent · `escribir-doctrina` write into a doctrine folder · `leer-skill` read a skill ·
+`leer-rag` read a knowledge base file.
+
+Direction takes `antes` (before) or `despues` (after). The window field is `ventana`, the start date
+is `desde`, the scope is `ambito`, and the pass mark is `umbral`.
+
