@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 *.pyo
 .pytest_cache/
+
+# El paso de CI que comprueba las cifras del README vuelca la salida aqui para poder mirarla dos
+# veces. Es un fichero de trabajo del runner y no tiene por que llegar al repositorio.
+salida.txt
