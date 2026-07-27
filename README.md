@@ -351,7 +351,7 @@ identificador de bloque.
 
 ### Requisitos
 
-Python 3.9 o superior. Biblioteca estándar, nada más. **Ese 3.9 está certificado** desde el 27/07/2026: nueve trabajos en verde, con 3.9, 3.12 y 3.14 sobre Windows, Linux y Mac. Hasta esa mañana aquí ponía «declarado, no certificado», y era cierto. Dejó de serlo con el primer push y siguió publicado unas horas, que es lo que pasa cuando un documento narra su propio estado: una nota de humildad caduca igual que una cifra, y esta caducó en la dirección que hace parecer el repositorio peor de lo que es.
+Python 3.9 o superior. Biblioteca estándar, nada más. **Ese 3.9 está certificado** desde el 27/07/2026: nueve trabajos en verde, con 3.9, 3.11 y 3.13 sobre Windows, Linux y Mac. Hasta esa mañana aquí ponía «declarado, no certificado», y era cierto. Dejó de serlo con el primer push y siguió publicado unas horas, que es lo que pasa cuando un documento narra su propio estado: una nota de humildad caduca igual que una cifra, y esta caducó en la dirección que hace parecer el repositorio peor de lo que es.
 
 ### Verificado en
 
@@ -683,7 +683,7 @@ numbers come out quietly wrong. This tool deduplicates by block id.
 
 ### Requirements
 
-Python 3.9+. Standard library only. **That 3.9 is certified** as of 27/07/2026: nine green jobs across 3.9, 3.12 and 3.14 on Windows, Linux and Mac. Until that morning this line read «declared, not certified», which was true. It stopped being true on the first push and stayed up for a few hours, which is what happens when a document narrates its own state: a note of humility goes stale like any other figure, and this one went stale in the direction that makes the repository look worse than it is.
+Python 3.9+. Standard library only. **That 3.9 is certified** as of 27/07/2026: nine green jobs across 3.9, 3.11 and 3.13 on Windows, Linux and Mac. Until that morning this line read «declared, not certified», which was true. It stopped being true on the first push and stayed up for a few hours, which is what happens when a document narrates its own state: a note of humility goes stale like any other figure, and this one went stale in the direction that makes the repository look worse than it is.
 
 ### Tested on
 

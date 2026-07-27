@@ -12,11 +12,17 @@ name: ci
 # ni biblioteca por encima de 3.9, pero eso encuentra incompatibilidades, no certifica compatibilidad.
 # Lo que la certifica es este fichero dando verde, y hasta el primer push no lo ha dado.
 #
-# YA LO HA DADO (27/07/2026): 9 de 9 trabajos en verde, con 3.9, 3.12 y 3.14 sobre Windows,
+# YA LO HA DADO (27/07/2026): 9 de 9 trabajos en verde, con 3.9, 3.11 y 3.13 sobre Windows,
 # Linux y Mac. El aviso de arriba se queda tachado y no borrado, porque era cierto cuando se
 # escribio y su correccion es el dato. La leccion: una nota de humildad tambien caduca, y esta
 # caduco EN LA DIRECCION QUE HACE PARECER EL REPOSITORIO PEOR DE LO QUE ES. Lo cazo una
 # revision ciega el mismo dia, no nosotros.
+#
+# Y la correccion se escribio MAL a la primera: decia 3.12 y 3.14, que son las versiones
+# del portatil donde se probo a mano, no las de esta matriz. O sea que al corregir una
+# frase caducada se publico un dato inventado, en el mismo parrafo que se felicitaba por
+# haber cazado la frase caducada. Lo cazaron DOS auditorias ciegas leyendo este fichero.
+# La linea de abajo es la fuente: si vuelven a no coincidir, manda la matriz.
 
 on:
   push:
