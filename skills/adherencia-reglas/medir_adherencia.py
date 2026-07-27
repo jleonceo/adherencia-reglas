@@ -898,7 +898,7 @@ def main(argv=None):
                          "defecto vale cualquiera, que es el supuesto mas grande del instrumento")
     ap.add_argument("--sensibilidad", action="store_true",
                     help="cuanto mueve la cifra CADA decision arbitraria del instrumento: la "
-                         "ventana, el colapso de rachas y la muestra minima. Si al cambiarlas se "
+                         "ventana, el colapso de rachas, el ambito de la respuesta y la muestra minima. Si al cambiarlas se "
                          "mueve mas que la diferencia que quieres defender, esa cifra no aguanta")
     ap.add_argument("--curva-ventana", action="store_true",
                     help="muestra como cambia la tasa con la ventana: sin esto, un numero suelto "
@@ -1218,7 +1218,7 @@ def main(argv=None):
                                  "  ".join("%-5d" % m for m in marcadas)))
 
         print()
-        print("Ninguna de las tres es un descubrimiento: son decisiones que alguien tomo. Si al")
+        print("Ninguna de las cuatro es un descubrimiento: son decisiones que alguien tomo. Si al")
         print("cambiarlas la cifra se mueve mas que la diferencia que quieres defender, esa cifra")
         print("no aguanta el peso que le estas poniendo.")
         return _veredicto(res)
