@@ -35,7 +35,8 @@ ejecuta tal cual, que es como se reproduce cada cifra de más abajo:
 
 ```bash
 git clone https://github.com/jleonceo/adherencia-reglas
-python adherencia-reglas/skills/adherencia-reglas/medir_adherencia.py --acciones
+cd adherencia-reglas
+python skills/adherencia-reglas/medir_adherencia.py --acciones
 ```
 
 
@@ -392,7 +393,8 @@ repository and runs as it is, which is how every figure below is reproduced:
 
 ```bash
 git clone https://github.com/jleonceo/adherencia-reglas
-python adherencia-reglas/skills/adherencia-reglas/medir_adherencia.py --acciones
+cd adherencia-reglas
+python skills/adherencia-reglas/medir_adherencia.py --acciones
 ```
 
 
