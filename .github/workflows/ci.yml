@@ -11,6 +11,12 @@ name: ci
 # Python 3.14 y 3.13 en Windows, y el README anuncia 3.9+. Un escaneo estatico no encontro sintaxis
 # ni biblioteca por encima de 3.9, pero eso encuentra incompatibilidades, no certifica compatibilidad.
 # Lo que la certifica es este fichero dando verde, y hasta el primer push no lo ha dado.
+#
+# YA LO HA DADO (27/07/2026): 9 de 9 trabajos en verde, con 3.9, 3.12 y 3.14 sobre Windows,
+# Linux y Mac. El aviso de arriba se queda tachado y no borrado, porque era cierto cuando se
+# escribio y su correccion es el dato. La leccion: una nota de humildad tambien caduca, y esta
+# caduco EN LA DIRECCION QUE HACE PARECER EL REPOSITORIO PEOR DE LO QUE ES. Lo cazo una
+# revision ciega el mismo dia, no nosotros.
 
 on:
   push:
@@ -21,6 +27,24 @@ defaults:
     working-directory: skills/adherencia-reglas
 
 jobs:
+
+  # EL GUARDIAN DE LOS GEMELOS (27/07/2026). Este repositorio y su hermano publican el mismo
+  # codigo, y cada arreglo hay que escribirlo dos veces. Salio bien mientras alguien se acordo. Va
+  # en UN solo trabajo y no en la matriz: la comparacion no depende del sistema ni de la version, y
+  # multiplicarla por nueve solo gasta peticiones a la API.
+  #
+  # Entre el push a uno y el push al otro este trabajo sale ROJO A PROPOSITO. Es la unica ventana
+  # en la que los dos arboles difieren de verdad, y taparla seria devolver el problema.
+  gemelo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Los dos gemelos siguen coincidiendo
+        working-directory: .
+        run: python test_gemelo.py
   test:
     runs-on: ${{ matrix.os }}
     strategy:

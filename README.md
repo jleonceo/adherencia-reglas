@@ -294,12 +294,12 @@ aquí hacen falta más días con muestra suficiente.
 
 ### Verificación
 
-157 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
+160 casos en tres bancos, sobre trazas fabricadas y nunca sobre el historial real: un banco que dependa
 de los datos de hoy cambia de resultado mañana.
 
 ```
 cd skills/adherencia-reglas
-python run_tests_adherencia.py     # 56 casos: la lógica
+python run_tests_adherencia.py     # 59 casos: la lógica
 python test_portabilidad.py        # 84 casos: la herramienta fuera de su casa
 python test_seguridad.py           # 17 casos: que no se lleve nada de tu historial
 python mutar.py                    # 15 sabotajes: comprueba que los bancos sirven
@@ -351,7 +351,7 @@ identificador de bloque.
 
 ### Requisitos
 
-Python 3.9 o superior. Biblioteca estándar, nada más. **Ese 3.9 está declarado, no certificado:** el flujo de CI que lo probaría no se ha ejecutado nunca, porque el repositorio se publica hoy. Aquí se ha ejecutado con 3.14 y 3.13 sobre Windows. La matriz certifica el suelo en cuanto haya un primer push, y hasta entonces el suelo es lo que el código admite a la vista, no lo que nadie ha comprobado.
+Python 3.9 o superior. Biblioteca estándar, nada más. **Ese 3.9 está certificado** desde el 27/07/2026: nueve trabajos en verde, con 3.9, 3.12 y 3.14 sobre Windows, Linux y Mac. Hasta esa mañana aquí ponía «declarado, no certificado», y era cierto. Dejó de serlo con el primer push y siguió publicado unas horas, que es lo que pasa cuando un documento narra su propio estado: una nota de humildad caduca igual que una cifra, y esta caducó en la dirección que hace parecer el repositorio peor de lo que es.
 
 ### Verificado en
 
@@ -633,12 +633,12 @@ here needs more days with a real sample.
 
 ### Verification
 
-157 cases across three benches, over fabricated traces and never over the real history: a bench that
+160 cases across three benches, over fabricated traces and never over the real history: a bench that
 depends on today's data gives a different answer tomorrow.
 
 ```
 cd skills/adherencia-reglas
-python run_tests_adherencia.py     # 56 cases: the logic
+python run_tests_adherencia.py     # 59 cases: the logic
 python test_portabilidad.py        # 84 cases: the tool away from home
 python test_seguridad.py           # 17 cases: that it takes nothing from your history
 python mutar.py                    # 15 sabotages: checks the benches are worth anything
@@ -683,7 +683,7 @@ numbers come out quietly wrong. This tool deduplicates by block id.
 
 ### Requirements
 
-Python 3.9+. Standard library only. **That 3.9 is declared, not certified:** the CI matrix that would prove it has never run, because the repository is being published today. It has been run here on 3.14 and 3.13 under Windows. The matrix certifies the floor as soon as there is a first push; until then the floor is what the code accepts on inspection, not what anyone has verified.
+Python 3.9+. Standard library only. **That 3.9 is certified** as of 27/07/2026: nine green jobs across 3.9, 3.12 and 3.14 on Windows, Linux and Mac. Until that morning this line read «declared, not certified», which was true. It stopped being true on the first push and stayed up for a few hours, which is what happens when a document narrates its own state: a note of humility goes stale like any other figure, and this one went stale in the direction that makes the repository look worse than it is.
 
 ### Tested on
 

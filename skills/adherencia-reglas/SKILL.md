@@ -28,11 +28,17 @@ metadata:
 > ámbito declarado y desde su fecha de alta. Sale de un historial privado: lo reproducible es el
 > ejemplo que trae el paquete.
 >
-> Esa cifra empezó el día siendo 24 %, pasó por 26 %, 38 % y 63 %, y acabó en 80 %. **Ninguna de las
-> anteriores estaba mal calculada.** Cada una medía un objeto distinto: todos los ficheros o solo los
-> que van dirigidos a alguien; desde siempre o desde el alta de la regla; datando las sesiones por la
-> fecha del fichero o por la que traen dentro. Medir una regla obliga a definirla, y definirla es
-> donde está el trabajo.
+> Esa cifra empezó el día siendo 24 %, pasó por 26 %, 38 % y 63 %, y acabó en el 78,0 % de arriba.
+> Aquí ponía «acabó en 80 %», que no cuadraba con las 103 de 132 de dos líneas antes: ese 80 era el
+> resto de una cifra de la mitad inglesa, 72 de 90, que ya se había corregido en su sitio y se quedó
+> viva aquí. Es exactamente el defecto que este documento describe, dentro del propio documento, y
+> no lo cazó ningún gate porque todos comprueban que un texto cuadre con el código, no que cuadre
+> **consigo mismo**. Lo encontró una simulación ciega leyendo las dos frases seguidas.
+>
+> **Ninguna de las anteriores estaba mal calculada.** Cada una medía un objeto distinto: todos los
+> ficheros o solo los que van dirigidos a alguien; desde siempre o desde el alta de la regla;
+> datando las sesiones por la fecha del fichero o por la que traen dentro. Medir una regla obliga a
+> definirla, y definirla es donde está el trabajo.
 
 ## Qué mide y qué no
 
@@ -184,10 +190,10 @@ cosas, que es justamente lo que aquí se hace.
 
 ## Banco
 
-Son **tres bancos y 157 casos**, todos sobre trazas fabricadas y nunca sobre el historial real: un banco
+Son **tres bancos y 160 casos**, todos sobre trazas fabricadas y nunca sobre el historial real: un banco
 que dependa de los datos de hoy cambia de resultado mañana.
 
-`run_tests_adherencia.py` lleva 56 casos y prueba la lógica.
+`run_tests_adherencia.py` lleva 59 casos y prueba la lógica.
 
 **Y los tres bancos están verificados por mutación, que es lo que separa un banco de un adorno.** No
 hay que creérselo: `python mutar.py` lo hace delante de quien lo ejecute, quince sabotajes contra los

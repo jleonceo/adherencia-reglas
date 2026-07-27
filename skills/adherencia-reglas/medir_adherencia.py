@@ -1092,6 +1092,31 @@ def main(argv=None):
         print("Regla mal declarada: %s" % e, file=sys.stderr)
         return 2
 
+    # UN CERO DE VOCABULARIO SE PARECE A UNO DE CONDUCTA EN TODAS LAS VISTAS, NO SOLO EN UNA
+    # (27/07/2026). El aviso se escribio para la tabla normal y se quedo ahi. `--curva-ventana`
+    # daba OCHO ceros seguidos sin una palabra, y ocho ceros en ocho plazos distintos no se leen
+    # como "aqui no aplica": se leen como prueba abrumadora de incumplimiento. Es el defecto que
+    # este instrumento persigue, cometido dentro del instrumento y justo en su vista mas
+    # persuasiva. Lo cazo una simulacion ciega sobre el paquete ya publicado.
+    #
+    # La leccion de segundo orden, que vale mas: un arreglo que se aplica al camino donde se
+    # noto el defecto, y no a la SUPERFICIE donde vive, deja hermanos vivos. Aqui eran cuatro.
+    #
+    # `vistas_respuesta` cuenta apariciones en TODO el historial, o sea que no depende de la
+    # ventana ni del dia: se calcula una vez y vale para todas las vistas.
+    MUDAS = set(r["id"] for r in res if r["vistas_respuesta"] == 0)
+
+    def _marca_muda(rid):
+        return " (v)" if rid in MUDAS else ""
+
+    def _nota_vocabulario(hay):
+        if not hay:
+            return
+        print()
+        print("  (v) esa accion no aparece NI UNA VEZ en este historial, asi que sus ceros son de")
+        print("      VOCABULARIO y no de conducta. Ejecuta --acciones para ver que nombres se")
+        print("      reconocen aqui, y ajusta la regla o quitala.")
+
     if args.por_dia is not None:
         # POR QUE EXISTE (25/07/2026). La tasa global de la puerta era 62,7 %, y desglosada por dia
         # aparecio lo que el agregado tapaba: 91 % el 22/07, que es el dia en que se cableo, y 25 %
@@ -1114,7 +1139,8 @@ def main(argv=None):
         print("=" * 76)
         # Truncar a 20 hacia que dos reglas con el mismo prefijo dieran columnas identicas con
         # valores opuestos. Se numeran y se lista la correspondencia debajo.
-        etiquetas = ["%d %s" % (i + 1, r["id"][:18]) for i, r in enumerate(reglas)]
+        etiquetas = ["%d %s%s" % (i + 1, r["id"][:18], "(v)" if r["id"] in MUDAS else "")
+                     for i, r in enumerate(reglas)]
         print("  %-12s %7s  %s" % ("dia", "sesion", "  ".join("%-20s" % e for e in etiquetas)))
         for d_ in dias:
             fila = []
@@ -1134,6 +1160,7 @@ def main(argv=None):
             print()
             for i, r in enumerate(reglas):
                 print("  %d = %s" % (i + 1, r["id"]))
+        _nota_vocabulario(any(r["id"] in MUDAS for r in reglas))
         if sin_fecha_propia:
             print()
             print("  AVISO: %d sesion(es) no traen fecha dentro y se han datado por la fecha del"
@@ -1158,9 +1185,11 @@ def main(argv=None):
                 rr = medir(paths, [dict(r0, ventana=v)], colapsar=not args.sin_colapsar,
                            rx_shell=rx_shell, acciones=acciones, carpetas=carpetas)[0]
                 fila.append("  n/d " if rr["tasa"] is None else "%5.1f" % rr["tasa"])
-            print("  %-30s %s" % (r0["id"][:30], "  ".join("%-6s" % x for x in fila)))
+            print("  %-30s %s%s" % (r0["id"][:30], "  ".join("%-6s" % x for x in fila),
+                                    _marca_muda(r0["id"])))
         print()
         print("Si la fila se mueve mucho, el numero que publiques depende del plazo que elijas.")
+        _nota_vocabulario(any(r0["id"] in MUDAS for r0 in reglas))
         return _veredicto(res)
 
     if args.sensibilidad:
@@ -1184,7 +1213,9 @@ def main(argv=None):
                 rr = medir(paths, [dict(r0, ventana=v)], colapsar=not args.sin_colapsar,
                            rx_shell=rx_shell, acciones=acciones, carpetas=carpetas)[0]
                 fila.append("  n/d " if rr["tasa"] is None else "%5.1f" % rr["tasa"])
-            print("     %-28s %s" % (r0["id"][:28], "  ".join("%-6s" % x for x in fila)))
+            print("     %-28s %s%s" % (r0["id"][:28], "  ".join("%-6s" % x for x in fila),
+                                       _marca_muda(r0["id"])))
+        _nota_vocabulario(any(r0["id"] in MUDAS for r0 in reglas))
 
         print()
         print("  2. COLAPSAR: una racha de escrituras seguidas, una ocasion o varias.")
@@ -1242,7 +1273,15 @@ def main(argv=None):
         return _veredicto(res)
 
     if args.json:
-        print(json.dumps(res, ensure_ascii=False, indent=2))
+        # LA SUPERFICIE DE MAQUINA ES DONDE EL CERO ENGAÑA MAS (27/07/2026). El dato crudo ya
+        # viajaba en `vistas_respuesta`, pero quien encadena esta salida lee `tasa` y decide. Un
+        # 0.0 que significa "no supe medirlo" y otro que significa "no lo hiciste" no pueden
+        # llegar iguales a un cuadro de mando: el campo derivado los separa sin que haya que
+        # conocer la regla.
+        salida_json = [dict(r, cero_de_vocabulario=(r["tasa"] == 0.0
+                                                    and r["vistas_respuesta"] == 0))
+                       for r in res]
+        print(json.dumps(salida_json, ensure_ascii=False, indent=2))
     else:
         # COBERTURA ANTES DE LA TABLA (25/07/2026). Probando el instrumento contra el historial de
         # OTRO proyecto salieron cuatro "n/d" seguidos, y esa pantalla se puede leer como "todo

@@ -354,6 +354,72 @@ class TestCeroSilencioso(Base):
         self.assertGreater(r["vistas_respuesta"], 0,
                            "el push SI esta en el historial: este cero es de conducta, no de vocabulario")
 
+    def _dos_reglas_una_muda(self):
+        """Un historial y dos reglas que dan CERO por motivos opuestos.
+
+        La muda pide una accion que no aparece nunca. La otra pide una que si aparece, pero fuera
+        de la ventana. Las dos salen 0.0 %, y el instrumento tiene que separarlas: si no, este
+        arreglo solo sabe decir que todo cero es sospechoso, que es no decir nada.
+        """
+        p = self.sesion("s.jsonl", [linea("Bash", {"command": "git add x"}, "b1", "m1"),
+                                    linea("Read", {"file_path": "a.py"}, "b2", "m2"),
+                                    linea("Read", {"file_path": "b.py"}, "b3", "m3"),
+                                    linea("Read", {"file_path": "c.py"}, "b4", "m4"),
+                                    linea("Bash", {"command": "git push"}, "b5", "m5")])
+        return p, [{"id": "muda-de-vocabulario", "disparador": "git-add", "respuesta": "test",
+                    "ventana": 3, "desde": "2000-01-01"},
+                   {"id": "cero-de-conducta", "disparador": "git-add", "respuesta": "git-push",
+                    "ventana": 1, "desde": "2000-01-01"}]
+
+    def _vista(self, path, reglas, *flags):
+        import subprocess
+        rj = os.path.join(self.tmp, "r.json")
+        with io.open(rj, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps({"reglas": reglas}, ensure_ascii=False))
+        aqui = os.path.dirname(os.path.abspath(__file__))
+        r = subprocess.run([sys.executable, os.path.join(aqui, "medir_adherencia.py"),
+                            "--sesiones", os.path.dirname(path), "--reglas", rj] + list(flags),
+                           capture_output=True, cwd=aqui)
+        return r.stdout.decode("utf-8", "replace")
+
+    def test_24_el_aviso_de_vocabulario_llega_a_TODAS_las_vistas(self):
+        """El arreglo del 27/07 se aplico al camino donde se noto el defecto, no a la superficie.
+
+        El aviso vivia solo en la tabla por defecto. `--curva-ventana` daba OCHO ceros seguidos sin
+        una palabra, y ocho ceros en ocho plazos distintos no se leen como "aqui no aplica": se leen
+        como prueba abrumadora de incumplimiento. Es el defecto que este paquete existe para cazar,
+        vivo en su vista mas persuasiva. Lo encontro una simulacion ciega sobre el paquete
+        publicado, no ningun gate de esta casa.
+        """
+        p, reglas = self._dos_reglas_una_muda()
+        for flags in (("--curva-ventana",), ("--sensibilidad",), ("--por-dia", "7")):
+            salida = self._vista(p, reglas, *flags)
+            self.assertIn("(v)", salida,
+                          "la vista %s no avisa del cero de vocabulario" % (flags,))
+            self.assertIn("VOCABULARIO", salida,
+                          "la marca sin su leyenda no explica nada en %s" % (flags,))
+
+    def test_25_control_la_vista_NO_marca_cuando_ninguna_regla_es_muda(self):
+        """Control negativo del de arriba. Con la muda fuera, ni marca ni leyenda: un aviso que sale
+        siempre es ruido y deja de significar algo el segundo dia."""
+        p, reglas = self._dos_reglas_una_muda()
+        for flags in (("--curva-ventana",), ("--sensibilidad",), ("--por-dia", "7")):
+            salida = self._vista(p, [reglas[1]], *flags)
+            self.assertNotIn("(v)", salida, "marca de mas en %s" % (flags,))
+            self.assertNotIn("VOCABULARIO", salida, "leyenda de mas en %s" % (flags,))
+
+    def test_26_el_modo_maquina_tambien_separa_los_dos_ceros(self):
+        """Quien encadena la salida lee `tasa` y decide; `vistas_respuesta` estaba ahi y habia que
+        conocer la regla para usarlo. El campo derivado lo dice sin que nadie lo deduzca."""
+        p, reglas = self._dos_reglas_una_muda()
+        datos = json.loads(self._vista(p, reglas, "--json"))
+        por_id = dict((d["id"], d) for d in datos)
+        self.assertEqual(por_id["muda-de-vocabulario"]["tasa"], 0.0)
+        self.assertEqual(por_id["cero-de-conducta"]["tasa"], 0.0)
+        self.assertTrue(por_id["muda-de-vocabulario"]["cero_de_vocabulario"])
+        self.assertFalse(por_id["cero-de-conducta"]["cero_de_vocabulario"],
+                         "los dos ceros llegarian iguales a un cuadro de mando")
+
 
 
 
