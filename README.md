@@ -32,13 +32,12 @@ El caso que originó esto: una regla con hook propio y skill dueña, cableada el
 **en 103 de 132 ocasiones, el 78,0 %** (medido el 27/07/2026 con esta misma versión del código, sobre
 un historial privado que tú no tienes: lo que sí puedes reproducir es el ejemplo de más abajo). La
 sospecha existía desde antes. El número no. Sin número no se decide nada: ni reforzar la regla, ni
-retirarla, ni dejarla como está.
+retirarla, ni dejarla como está. El día que se midió por primera vez, esa misma regla dio 24 % por la
+mañana y 80 % por la tarde, y ninguna de las versiones intermedias estaba mal calculada. Cada una
+medía un objeto distinto: todos los ficheros o solo los que van dirigidos a alguien, desde siempre o
+desde el alta de la regla, datando las sesiones por la fecha del fichero o por la que traen dentro.
 
-El día que se midió por primera vez, esa misma regla dio 24 % por la mañana y 80 % por la tarde, y
-ninguna de las versiones intermedias estaba mal
-calculada. Cada una medía un objeto distinto: todos los ficheros o solo los que van dirigidos a
-alguien, desde siempre o desde el alta de la regla, datando las sesiones por la fecha del fichero o
-por la que traen dentro. **Medir una regla obliga a definirla**, y definirla resultó ser el trabajo.
+Así que **medir una regla obliga a definirla**. Definirla resultó ser el trabajo.
 
 ### Qué hace
 
@@ -48,7 +47,9 @@ declares cuenta dos cosas:
 1. Cuántas veces apareció la situación que la activa.
 2. Cuántas veces llegó la respuesta que la regla exige.
 
-Devuelve la tasa. Nada más. Sin modelo de lenguaje de por medio, sin red, sin dependencias.
+Devuelve la tasa. Nada más.
+
+Sin modelo de lenguaje de por medio, sin red, sin dependencias.
 
 El paquete trae un ejemplo que puedes reproducir ahora mismo, sin tocar tu historial:
 
@@ -68,10 +69,9 @@ mide. Sale esto, y te sale igual a ti:
 ```
 
 `(*)` marca las que tienen menos de diez ocasiones. Eso no es una tasa, es una anécdota con
-decimales, y la herramienta lo dice sola para que nadie cite un 100 % de dos casos.
-
-Alrededor verás más cosas: cuántas sesiones y acciones se han leído, la fuente declarada de cada
-regla, y los avisos que correspondan. Aquí van recortadas para que se vea lo que importa.
+decimales, y la herramienta lo dice sola para que nadie cite un 100 % de dos casos. Alrededor verás
+más cosas: cuántas sesiones y acciones se han leído, la fuente declarada de cada regla, y los avisos
+que correspondan. Aquí van recortadas para que se vea lo que importa.
 
 **Por qué el ejemplo se genera en vez de venir escrito.** Hasta el 26/07/2026 este bloque enseñaba
 una tabla sacada de un historial privado. El repo no traía ninguno. Quien clonaba no podía
@@ -256,11 +256,12 @@ propósito y cada sabotaje tiene que ponerlo rojo. **Eso no hay que creérselo: 
 hace delante de ti**, quince sabotajes contra los tres bancos, y dice cuántos se cazan y cuántos pasan
 callando. Un sabotaje que nadie caza no es un fallo del código: es una línea que el banco no vigila.
 Hoy son quince de quince, cero huecos. Si esa cifra baja al ejecutarlo, el banco ha dejado de cubrir algo
-y el número que te dé la herramienta vale menos de lo que parece.
+y el número que te dé la herramienta vale menos de lo que parece. El fichero medido se restaura al
+terminar, y también si el proceso muere a mitad: `mutar.py` deja una copia intacta en disco mientras
+dura el sabotaje, cualquier ejecución posterior la usa para reparar, y mientras esa copia siga ahí
+`test_seguridad.py` se pone rojo.
 
-El fichero medido se restaura al terminar, y también si el proceso muere a mitad: `mutar.py` deja una
-copia intacta en disco mientras dura el sabotaje, cualquier ejecución posterior la usa para reparar, y
-mientras esa copia siga ahí `test_seguridad.py` se pone rojo. Se probó matando el proceso a la fuerza.
+Se probó matando el proceso a la fuerza.
 
 La mutación encontró un hueco que tres lecturas a mano no vieron: al quitar la normalización de separadores de ruta, los casos de portabilidad de entonces
 seguían verdes, porque probaban el filtro por carpeta y no la clasificación. Con rutas de Windows,
@@ -277,8 +278,9 @@ identificador de mensaje, así que la misma llamada reaparece en varias líneas.
 el recuento un 58 % sobre 12 sesiones medidas. La inflación no es uniforme entre sesiones, de modo que
 no basta con dividir al final: deforma la curva entera.
 
-El fallo no da ningún síntoma. Los números salen mal en silencio. Esta herramienta deduplica por
-identificador de bloque.
+El fallo no da ningún síntoma. Los números salen mal en silencio.
+
+Esta herramienta deduplica por identificador de bloque.
 
 ### Requisitos
 
@@ -351,11 +353,11 @@ is what comes out. It will come out the same for you:
 ```
 
 `(*)` marks the ones with fewer than ten opportunities. That is not a rate, it is an anecdote with
-decimals, and the tool says so on its own so that nobody quotes a 100 % built on two cases.
+decimals, and the tool says so on its own so that nobody quotes a 100 % built on two cases. The
+example is generated rather than shipped as fixed text on purpose: if the generator and the measurer
+ever disagree, the table changes and the CI notices.
 
-The example is generated rather than shipped as fixed text on purpose: if the generator and the
-measurer ever disagree, the table changes and the CI notices. A committed output file would agree
-with itself forever.
+A committed output file would agree with itself forever.
 
 *This whole block existed only in the Spanish half until 27/07/2026. A foreign reader was handed the
 claims and not the one thing they could check for themselves.*
@@ -520,12 +522,12 @@ when you run it, the bench has stopped covering something.
 
 The measured file is restored on exit, and also if the process is killed mid-run: `mutar.py` keeps an
 intact copy on disk while the sabotage is in place, any later run repairs from it, and while that copy
-is there `test_seguridad.py` turns red. This was tested by force-killing the process.
+is there `test_seguridad.py` turns red. This was tested by force-killing the process. Mutation found a
+gap three manual reviews had missed, where Windows paths stopped being classified as doctrine and
+silently counted as ordinary documents.
 
-Mutation found a gap three manual reviews had missed, where Windows paths stopped being classified as
-doctrine and silently counted as ordinary documents. Also verified against real history for
-**discrimination**: pairs that hold by construction score 62 % to 86 %; three pairs with no causal
-link score 0.0 % each.
+Also verified against real history for **discrimination**: pairs that hold by construction score 62 %
+to 86 %; three pairs with no causal link score 0.0 % each.
 
 ### A format detail that costs dearly
 
