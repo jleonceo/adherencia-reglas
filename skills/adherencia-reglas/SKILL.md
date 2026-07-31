@@ -22,17 +22,17 @@ metadata:
 # adherencia-reglas: el espejo de las normas propias
 
 > **Principio rector.** Una regla escrita y no medida es una intención. Este proyecto lleva meses
-> acumulando normas en CLAUDE.md, en skills y en protocolos, y el 25/07/2026 contó por primera vez
+> acumulando normas en CLAUDE.md, en skills y en protocolos. El 25/07/2026 contó por primera vez
 > cuántas se cumplían. La que ordena pasar la puerta de salida antes de publicar un texto, con hook
 > propio y skill dueña, se cumplía en **103 de 132 ocasiones (78,0 %)**, medida el 27/07/2026 con ventana de 6 pasos,
 > ámbito declarado y desde su fecha de alta. Sale de un historial privado: lo reproducible es el
 > ejemplo que trae el paquete.
 >
-> Esa cifra empezó el día siendo 24 %, pasó por 26 %, 38 % y 63 %, y acabó en el 78,0 % de arriba.
+> Esa cifra empezó el día siendo 24 %, pasó por 26 %, 38 % y 63 % y acabó en el 78,0 % de arriba.
 > Aquí ponía «acabó en 80 %», que no cuadraba con las 103 de 132 de dos líneas antes: ese 80 era el
 > resto de una cifra de la mitad inglesa, 72 de 90, que ya se había corregido en su sitio y se quedó
-> viva aquí. Es exactamente el defecto que este documento describe, dentro del propio documento, y
-> no lo cazó ningún gate porque todos comprueban que un texto cuadre con el código, no que cuadre
+> viva aquí. Es exactamente el defecto que este documento describe, dentro del propio documento. No
+> lo cazó ningún gate porque todos comprueban que un texto cuadre con el código, no que cuadre
 > **consigo mismo**. Lo encontró una simulación ciega leyendo las dos frases seguidas.
 >
 > **Ninguna de las anteriores estaba mal calculada.** Cada una medía un objeto distinto: todos los
@@ -63,7 +63,7 @@ Sin argumentos mide la conversación principal de todos los proyectos. Para acot
 python ${CLAUDE_SKILL_DIR}/medir_adherencia.py --sesiones "~/.claude/projects/MI-PROYECTO"
 ```
 
-`${CLAUDE_SKILL_DIR}` es el directorio donde vive este `SKILL.md`, y Claude Code lo sustituye antes
+`${CLAUDE_SKILL_DIR}` es el directorio donde vive este `SKILL.md` y Claude Code lo sustituye antes
 de ejecutar nada. **Aquí ponía la ruta escrita a mano, `~/.claude/skills/adherencia-reglas/`.** Esa
 ruta solo existe si la skill se copia a mano: instalada desde el marketplace de plugins el fichero
 vive en otro sitio y el comando fallaba, o sea que la vía de instalación principal estaba rota.
@@ -98,7 +98,7 @@ instrumento le pone un asterisco justo por eso, porque cuatro ocasiones no son u
 alguien se quejó de ese parámetro en concreto. Una auditoría que miraba el razonamiento de la
 jornada en lugar de sus defectos hizo la pregunta general: **qué otros números de esta herramienta son un umbral
 elegido a ojo y publicado sin su sensibilidad**. Había dos más, el colapso de rachas y la muestra
-mínima, y ninguna de las cuatro rondas de revisión los tocó, porque cada ronda reaccionó a una queja
+mínima. Ninguna de las cuatro rondas de revisión los tocó, porque cada ronda reaccionó a una queja
 concreta y nadie generalizó. La vista los enseña **los cuatro** a la vez, contando el de si la
 respuesta tiene que caer en el mismo ámbito, que el propio bloque llama el supuesto más grande del
 instrumento. Aquí ponía «los tres», heredado de cuando ese cuarto se numeró «2-bis» para no tocar la
@@ -111,7 +111,7 @@ Salidas: `0` todas las reglas por encima de su umbral, `1` alguna por debajo, `2
 
 **Falla ruidosamente ante una configuración mala**, porque los tres casos siguientes pasaban callando
 y daban resultados sin sentido: un `ambito` escrito como texto en vez de lista (se recorre por
-caracteres y filtra al azar), una ventana de cero o negativa, y dos reglas con el mismo identificador.
+caracteres y filtra al azar), una ventana de cero o negativa y dos reglas con el mismo identificador.
 
 ## Las reglas se declaran fuera del código
 
@@ -130,7 +130,7 @@ vale esa respuesta y **desde cuándo existe la regla**.
 **`direccion` importa más de lo que parece.** Muchas obligaciones son «haz X antes de Y»: escanear
 los repositorios antes de publicar, abrir el documento antes de actuar. Medidas hacia adelante salen
 hundidas. La del escáner daba 7,7 % planteada al revés y 36,4 % bien. Ese último campo no es
-decoración: sin él se juzgan meses en los que la norma no existía, y sale una cifra bien calculada
+decoración: sin él se juzgan meses en los que la norma no existía y sale una cifra bien calculada
 sobre el objeto equivocado. La primera medición del proyecto dio 8,4 % sin acotar y 24,1 % acotando.
 
 El campo `umbral` es opcional a propósito. Un umbral puesto a ojo es peor que ninguno, porque crea
@@ -147,7 +147,7 @@ una diana que nadie ha justificado.
 
 ## Dos límites que hay que decir antes de enseñar la tabla
 
-**Hay reglas que este instrumento no puede medir bien**, y conviene tenerlas identificadas en vez de
+**Hay reglas que este instrumento no puede medir bien.** Conviene tenerlas identificadas en vez de
 fingir que la tabla las cubre. La norma «antes de decir que algo no existe, búscalo» tiene como
 disparador real una intención mía, que no deja ninguna llamada a herramienta. Aproximarla por
 «escribir un documento» produce un denominador enorme y una tasa hundida que no significa nada.
@@ -184,7 +184,7 @@ herramienta se queda fuera de los dos. Ese hueco conviene tenerlo presente.
 | ¿los guardianes bloquean cuando toca? | `guardianes-verificados-ia` |
 | ¿y las reglas que no tienen guardián, se cumplieron? | **esta skill** |
 
-Fuera del proyecto hay herramientas que abren este mismo historial para contar coste y consumo, y
+Fuera del proyecto hay herramientas que abren este mismo historial para contar coste y consumo, más
 otras que revisan los ficheros de reglas para ver si están bien escritos. Ninguna cruza las dos
 cosas, que es justamente lo que aquí se hace.
 
@@ -197,7 +197,7 @@ que dependa de los datos de hoy cambia de resultado mañana.
 
 **Y los tres bancos están verificados por mutación, que es lo que separa un banco de un adorno.** No
 hay que creérselo: `python mutar.py` lo hace delante de quien lo ejecute, quince sabotajes contra los
-tres bancos, y dice cuántos se cazan. Hoy, quince de quince y cero huecos. Una mutación que nadie caza no
+tres bancos. Dice cuántos se cazan. Hoy, quince de quince y cero huecos. Una mutación que nadie caza no
 es un fallo del código: es una línea que el banco no vigila. El fichero medido se restaura al acabar
 y también si matan el proceso a mitad, porque la copia intacta vive en disco y no en el flujo del
 programa; mientras esa copia esté ahí, `test_seguridad.py` se pone rojo.
@@ -207,12 +207,12 @@ completo de sesiones, donde hay nombres, cuentas bancarias, documentos de identi
 por descuido. Se plantan canarios de mentira en un historial de juguete y se exige que no salgan por
 las vistas de agregados ni por ningún camino de error, además de la comprobación de que no escribe
 nada. **`--acciones` queda fuera de esa promesa a propósito**: enseña rutas del historial porque para
-eso existe, y sin una ruta de ejemplo nadie puede saber si su vocabulario casa con su trabajo. Que la salida
+eso existe. Sin una ruta de ejemplo nadie sabría si su vocabulario casa con su trabajo. Que la salida
 sea agregada se puede ver leyendo el código; leerlo no es garantizarlo.
 
 `test_portabilidad.py` lleva 84 casos y prueba otra cosa: que la herramienta sirva fuera de esta máquina.
 Rutas POSIX y de Windows, vocabulario de otro proyecto, configuración mal escrita y otra estructura
-de carpetas. Existe porque el primero no cubría nada de eso, y ninguno de esos casos da error: todos
+de carpetas. Existe porque el primero no cubría nada de eso. Ninguno de esos casos da error: todos
 devuelven números, y los números están mal.
 
 **El segundo banco nació de un cambio de diseño, y hubo que hacerlo DOS veces.** Cinco acciones del
@@ -230,7 +230,7 @@ que se suma a `pytest` en vez de sustituirla. Lo que se corrigió fue la promesa
 quedó como estaba, con un aviso por pantalla cuando ocurre.
 
 **Y la mutación sirvió para algo más que confirmar.** El caso que vigilaba la deduplicación se quedó
-CIEGO al cambiar el diseño: ponía tres escrituras seguidas, y el colapso de repeticiones ya las
+CIEGO al cambiar el diseño: ponía tres escrituras seguidas y el colapso de repeticiones ya las
 juntaba, así que pasaba igual sin deduplicar. Con una lectura en medio vuelve a discriminar. Un test
 puede dejar de proteger cuando el código cambia debajo. Sin mutaciones nadie se entera.
 
