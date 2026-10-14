@@ -1,5 +1,8 @@
 # adherencia-reglas
 
+> Este repositorio cuenta el método y las cifras. Para instalar la herramienta como plugin de Claude Code, usa su gemelo [skill-adherencia-reglas](https://github.com/jleonceo/skill-adherencia-reglas).  
+> *This repository holds the method and the figures. To install the tool as a Claude Code plugin, use its twin [skill-adherencia-reglas](https://github.com/jleonceo/skill-adherencia-reglas).*
+
 **Le escribes reglas a tu agente de IA y no sabes si las cumple. Este programa lo cuenta sobre el
 registro de sesiones que Claude Code ya guarda en tu disco y te devuelve un porcentaje por regla.**
 
