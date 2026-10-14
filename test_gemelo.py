@@ -221,6 +221,9 @@ def main():
     print()
     print("  Los %d ficheros vigilados coinciden, y no ha aparecido ninguno sin declarar."
           % len(VIGILADOS))
+    # El recuento en la forma que lee `listo_para_publicar.py`: sin el, el gate no sabe cuantos
+    # casos ejecuta este banco y no deja publicar (14/10/2026).
+    print("  %d/%d comprobaciones en verde" % (len(VIGILADOS), len(VIGILADOS)))
     return 0
 
 
