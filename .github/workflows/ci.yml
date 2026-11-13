@@ -66,7 +66,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        # ubuntu-22.04 y no ubuntu-latest: la imagen nueva ya no instala Python 3.9 (13/11/2026)
+        os: [windows-latest, ubuntu-22.04, macos-latest]
         python-version: ["3.9", "3.11", "3.13"]
         # 3.8 SALIO de la matriz el 26/07. `macos-latest` es arm64 desde 2024 y
         # `actions/setup-python` no publica 3.8 para esa arquitectura, asi que ese eje habria

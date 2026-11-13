@@ -911,7 +911,9 @@ class TestCifrasDeLaPortada(unittest.TestCase):
     # fabrica", "puedes redefinir una que ya exista"), y las tres estaban caducadas o eran falsas
     # mientras el guardian pasaba en verde. El guardian miraba los dos documentos que se leen
     # como documentacion y no el fichero de configuracion, que tambien se lee y tambien afirma.
-    DOCS = ["README.md", "SKILL.md", "reglas.json"]
+    # `README.en.md` ENTRO EL 13/11/2026, al pasar el ingles de la portada a su propio fichero: sin
+    # el, las cifras inglesas se quedaban sin vigilar, que es justo el punto ciego de mas abajo.
+    DOCS = ["README.md", "README.en.md", "SKILL.md", "reglas.json"]
 
     # EL README NO ESTA AQUI, y por eso este guardian llevaba desde que nacio sin leerlo (lo
     # encontro un auditor el 25/07 poniendo "999 casos" en las DOS mitades del README y viendo el
@@ -1293,10 +1295,17 @@ class TestCifrasDeLaPortada(unittest.TestCase):
                 if os.path.basename(d).lower() == "readme.md"]
         if not docs:
             self.skipTest("aqui no hay README que comprobar")
+        # Desde el 13/11/2026 el ingles vive en `README.en.md`, al lado de `README.md`: las dos
+        # mitades se comparan igual, juntando los dos ficheros. Un README sin ninguna de las dos
+        # formas no es bilingue y no se compara aqui.
+        ingles = {os.path.dirname(d): t for d, t in self._docs_a_mirar()
+                  if os.path.basename(d).lower() == "readme.en.md"}
         malas, comprobados = [], 0
         for d, texto in docs:
             if "## English" not in texto:
-                continue
+                if os.path.dirname(d) not in ingles:
+                    continue
+                texto = texto + "\n" + ingles[os.path.dirname(d)]
             m, c = self._comparar_mitades(d, texto)
             malas.extend(m)
             comprobados += c
